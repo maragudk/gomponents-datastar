@@ -1,25 +1,29 @@
 package datastar_test
 
 import (
-	"fmt"
 	"testing"
 
-	g "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
 	ds "maragu.dev/gomponents-datastar"
 	"maragu.dev/gomponents-datastar/internal/assert"
 )
 
-func TestAttributes(t *testing.T) {
-	attrs := map[string]func(string, string) g.Node{
-		"attr": ds.Attr,
-	}
+func TestAttr(t *testing.T) {
+	t.Run(`should output data-attr="{title: $title}"`, func(t *testing.T) {
+		n := Div(ds.Attr("title", "$title"))
+		assert.Equal(t, `<div data-attr="{title: $title}"></div>`, n)
+	})
 
-	for name, attr := range attrs {
-		t.Run(fmt.Sprintf(`should output data-%v-hat="party"`, name), func(t *testing.T) {
-			n := Div(attr("hat", "party"))
-			assert.Equal(t, fmt.Sprintf(`<div data-%v-hat="party"></div>`, name), n)
-		})
-	}
+	t.Run(`should output data-attr="{title: $title, id: $id}"`, func(t *testing.T) {
+		n := Div(ds.Attr("title", "$title", "id", "$id"))
+		assert.Equal(t, `<div data-attr="{title: $title, id: $id}"></div>`, n)
+	})
+}
+
+func TestBind(t *testing.T) {
+	t.Run(`should output data-bind="hat"`, func(t *testing.T) {
+		n := Input(ds.Bind("hat"))
+		assert.Equal(t, `<input data-bind="hat">`, n)
+	})
 }
