@@ -95,7 +95,7 @@ const (
 	ModifierPrevent        Modifier = "__prevent"
 	ModifierStop           Modifier = "__stop"
 	ModifierThrottle       Modifier = "__throttle"
-	ModifierViewtransition Modifier = "__viewTransition"
+	ModifierViewTransition Modifier = "__viewtransition"
 	ModifierWindow         Modifier = "__window"
 )
 
