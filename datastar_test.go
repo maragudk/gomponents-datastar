@@ -27,3 +27,22 @@ func TestBind(t *testing.T) {
 		assert.Equal(t, `<input data-bind="hat">`, n)
 	})
 }
+
+func TestClass(t *testing.T) {
+	t.Run(`should output data-class="{hidden: $hidden}"`, func(t *testing.T) {
+		n := Div(ds.Class("hidden", "$hidden"))
+		assert.Equal(t, `<div data-class="{hidden: $hidden}"></div>`, n)
+	})
+
+	t.Run(`should output data-class="{hidden: $hidden, font-bold: $bold}"`, func(t *testing.T) {
+		n := Div(ds.Class("hidden", "$hidden", "font-bold", "$bold"))
+		assert.Equal(t, `<div data-class="{hidden: $hidden, font-bold: $bold}"></div>`, n)
+	})
+}
+
+func TestText(t *testing.T) {
+	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
+		n := Div(ds.Text("$foo"))
+		assert.Equal(t, `<div data-text="$foo"></div>`, n)
+	})
+}

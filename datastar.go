@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	g "maragu.dev/gomponents"
-	. "maragu.dev/gomponents/html"
+	"maragu.dev/gomponents/html"
 )
 
 // Attr sets the value of any HTML attribute to an expression, and keeps it in sync.
@@ -23,15 +23,7 @@ func Attr(pairs ...string) g.Node {
 	if len(pairs)%2 == 1 {
 		panic("each attribute name must have a value")
 	}
-	v := "{"
-	for i := 0; i < len(pairs); i += 2 {
-		v += fmt.Sprintf(`%s: %s`, pairs[i], pairs[i+1])
-		if i < len(pairs)-2 {
-			v += ", "
-		}
-	}
-	v += "}"
-	return Data("attr", v)
+	return html.Data("attr", toObject(pairs))
 }
 
 // Bind creates a signal (if one doesn’t already exist) and sets up two-way data binding between it and an element’s value.
@@ -58,5 +50,45 @@ func Attr(pairs ...string) g.Node {
 //
 // See https://data-star.dev/reference/attributes#data-bind
 func Bind(name string) g.Node {
-	return Data("bind", name)
+	return html.Data("bind", name)
+}
+
+// Class adds or removes a class to or from an element based on an expression.
+//
+// <div data-class-hidden="$foo"></div>
+//
+// If the expression evaluates to true, the `hidden` class is added to the element; otherwise, it is removed.
+//
+// The `data-class` attribute can also be used to add or remove multiple classes from an element using a set of key-value pairs,
+// where the keys represent class names and the values represent expressions.
+//
+// <div data-class="{hidden: $foo, 'font-bold': $bar}"></div>
+//
+// See https://data-star.dev/reference/attributes#data-class
+func Class(pairs ...string) g.Node {
+	if len(pairs)%2 == 1 {
+		panic("each class name must have a value")
+	}
+	return html.Data("class", toObject(pairs))
+}
+
+// Text binds the text content of an element to an expression.
+//
+// <div data-text="$foo"></div>
+//
+// See https://data-star.dev/reference/attributes#data-text
+func Text(v string) g.Node {
+	return html.Data("text", v)
+}
+
+func toObject(pairs []string) string {
+	v := "{"
+	for i := 0; i < len(pairs); i += 2 {
+		v += fmt.Sprintf(`%s: %s`, pairs[i], pairs[i+1])
+		if i < len(pairs)-2 {
+			v += ", "
+		}
+	}
+	v += "}"
+	return v
 }
