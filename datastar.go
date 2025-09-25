@@ -4,6 +4,7 @@ package datastar
 
 import (
 	"fmt"
+	"time"
 
 	g "maragu.dev/gomponents"
 	"maragu.dev/gomponents/html"
@@ -79,6 +80,61 @@ func Class(pairs ...string) g.Node {
 // See https://data-star.dev/reference/attributes#data-text
 func Text(v string) g.Node {
 	return html.Data("text", v)
+}
+
+type Modifier string
+
+const (
+	ModifierCapture        Modifier = "__capture"
+	ModifierCase           Modifier = "__case"
+	ModifierDebounce       Modifier = "__debounce"
+	ModifierDelay          Modifier = "__delay"
+	ModifierOnce           Modifier = "__once"
+	ModifierOutside        Modifier = "__outside"
+	ModifierPassive        Modifier = "__passive"
+	ModifierPrevent        Modifier = "__prevent"
+	ModifierStop           Modifier = "__stop"
+	ModifierThrottle       Modifier = "__throttle"
+	ModifierViewtransition Modifier = "__viewTransition"
+	ModifierWindow         Modifier = "__window"
+)
+
+const (
+	ModifierCamel     Modifier = ".camel" // Camel case: myEvent
+	ModifierKebab     Modifier = ".kebab" // Kebab case: my-event
+	ModifierLeading   Modifier = ".leading"
+	ModifierNoLeading Modifier = ".noleading"
+	ModifierNoTrail   Modifier = ".notrail"
+	ModifierPascal    Modifier = ".pascal" // Pascal case: MyEvent
+	ModifierSnake     Modifier = ".snake"  // Snake case: my_event
+	ModifierTrail     Modifier = ".trail"
+)
+
+// ModifierDuration outputs millisecond values for durations under 1 second, otherwise second values.
+func ModifierDuration(d time.Duration) Modifier {
+	if d.Seconds() < 1 {
+		return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
+	}
+	return Modifier(fmt.Sprintf(".%vs", int(d.Seconds())))
+}
+
+// On attaches an event listener to an element, executing an expression whenever the event is triggered.
+//
+// <button data-on-click="$foo = ”">Reset</button>
+//
+// An evt variable that represents the event object is available in the expression.
+//
+// <div data-on-myevent="$foo = evt.detail"></div>
+//
+// The `data-on` attribute works with events and custom events. The `data-on-submit` event listener prevents the default submission behavior of forms.
+//
+// See https://data-star.dev/reference/attributes#data-on
+func On(event, expression string, modifiers ...Modifier) g.Node {
+	eventWithModifiers := event
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return html.Data("on-"+eventWithModifiers, expression)
 }
 
 func toObject(pairs []string) string {

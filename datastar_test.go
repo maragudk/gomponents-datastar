@@ -2,6 +2,7 @@ package datastar_test
 
 import (
 	"testing"
+	"time"
 
 	. "maragu.dev/gomponents/html"
 
@@ -44,5 +45,17 @@ func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
 		assert.Equal(t, `<div data-text="$foo"></div>`, n)
+	})
+}
+
+func TestOn(t *testing.T) {
+	t.Run(`should output data-on-click="$foo = ''"`, func(t *testing.T) {
+		n := Button(ds.On("click", "$foo = ''"))
+		assert.Equal(t, `<button data-on-click="$foo = &#39;&#39;"></button>`, n)
+	})
+
+	t.Run(`should output data-on-click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
+		n := Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading))
+		assert.Equal(t, `<button data-on-click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
 	})
 }
