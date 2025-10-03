@@ -175,6 +175,23 @@ func IgnoreMorph() g.Node {
 	return data("ignore-morph")
 }
 
+// Indicator creates a signal and sets its value to `true` while a fetch request is in flight, otherwise `false`.
+//
+// <button data-on-click="@get('/endpoint')" data-indicator-fetching></button>
+//
+// The signal name can be specified in the key (as above), or in the value (as below). This can be useful depending on the templating language you are using.
+//
+// <button data-on-click="@get('/endpoint')" data-indicator="fetching"></button>
+//
+// See https://data-star.dev/reference/attributes#data-indicator
+func Indicator(name string, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("indicator"+nameWithModifiers, name)
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
