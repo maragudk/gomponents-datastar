@@ -355,6 +355,20 @@ func Ref(name string, modifiers ...Modifier) g.Node {
 	return data("ref"+nameWithModifiers, name)
 }
 
+// Show or hide an element based on whether an expression evaluates to true or false.
+// For anything with custom requirements, use data-class instead.
+//
+// <div data-show="$foo"></div>
+//
+// To prevent flickering of the element before Datastar has processed the DOM, you can add a display: none style to the element to hide it initially.
+//
+// <div data-show="$foo" style="display: none"></div>
+//
+// See https://data-star.dev/reference/attributes#data-show
+func Show(expression string) g.Node {
+	return data("show", expression)
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
