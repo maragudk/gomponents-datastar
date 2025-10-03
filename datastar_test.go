@@ -248,6 +248,31 @@ func TestPreserveAttr(t *testing.T) {
 	})
 }
 
+func TestRef(t *testing.T) {
+	t.Run(`should output data-ref="foo"`, func(t *testing.T) {
+		n := Div(ds.Ref("foo"))
+		assert.Equal(t, `<div data-ref="foo"></div>`, n)
+	})
+
+	tests := []struct {
+		name     string
+		modifier ds.Modifier
+		expected string
+	}{
+		{name: `should output data-ref__case.camel="foo"`, modifier: ds.ModifierCamel, expected: `<div data-ref__case.camel="foo"></div>`},
+		{name: `should output data-ref__case.kebab="foo"`, modifier: ds.ModifierKebab, expected: `<div data-ref__case.kebab="foo"></div>`},
+		{name: `should output data-ref__case.snake="foo"`, modifier: ds.ModifierSnake, expected: `<div data-ref__case.snake="foo"></div>`},
+		{name: `should output data-ref__case.pascal="foo"`, modifier: ds.ModifierPascal, expected: `<div data-ref__case.pascal="foo"></div>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n := Div(ds.Ref("foo", ds.ModifierCase, test.modifier))
+			assert.Equal(t, test.expected, n)
+		})
+	}
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))

@@ -338,6 +338,23 @@ func PreserveAttr(attrs ...string) g.Node {
 	return data("preserve-attr", strings.Join(attrs, " "))
 }
 
+// Ref creates a signal that is a reference to the HTML element.
+//
+// <div data-ref="foo"></div>
+//
+// The signal name can be specified in the key (as above), or in the value (as below). This can be useful depending on the templating language you are using.
+//
+// <div data-ref-foo></div>
+//
+// See https://data-star.dev/reference/attributes#data-ref
+func Ref(name string, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("ref"+nameWithModifiers, name)
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
