@@ -280,6 +280,33 @@ func TestShow(t *testing.T) {
 	})
 }
 
+func TestSignals(t *testing.T) {
+	t.Run(`should output data-signals="{"foo":1}"`, func(t *testing.T) {
+		n := Div(ds.Signals(map[string]any{"foo": 1}))
+		assert.Equal(t, `<div data-signals="{&#34;foo&#34;:1}"></div>`, n)
+	})
+
+	t.Run(`should output data-signals="{"bar":2,"foo":1}"`, func(t *testing.T) {
+		n := Div(ds.Signals(map[string]any{"foo": 1, "bar": 2}))
+		assert.Equal(t, `<div data-signals="{&#34;bar&#34;:2,&#34;foo&#34;:1}"></div>`, n)
+	})
+
+	t.Run(`should output data-signals with nested objects`, func(t *testing.T) {
+		n := Div(ds.Signals(map[string]any{"foo": map[string]any{"bar": 1, "baz": 2}}))
+		assert.Equal(t, `<div data-signals="{&#34;foo&#34;:{&#34;bar&#34;:1,&#34;baz&#34;:2}}"></div>`, n)
+	})
+
+	t.Run(`should output data-signals__ifmissing="{"foo":1}"`, func(t *testing.T) {
+		n := Div(ds.Signals(map[string]any{"foo": 1}, ds.ModifierIfMissing))
+		assert.Equal(t, `<div data-signals__ifmissing="{&#34;foo&#34;:1}"></div>`, n)
+	})
+
+	t.Run(`should output data-signals__case.kebab="{"foo":1}"`, func(t *testing.T) {
+		n := Div(ds.Signals(map[string]any{"foo": 1}, ds.ModifierCase, ds.ModifierKebab))
+		assert.Equal(t, `<div data-signals__case.kebab="{&#34;foo&#34;:1}"></div>`, n)
+	})
+}
+
 func TestStyle(t *testing.T) {
 	t.Run(`should output data-style="{display: $hiding ? 'none' : 'flex'}"`, func(t *testing.T) {
 		n := Div(ds.Style("display", "$hiding ? 'none' : 'flex'"))

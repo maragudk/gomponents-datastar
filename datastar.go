@@ -3,6 +3,7 @@
 package datastar
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -25,6 +26,7 @@ const (
 	ModifierDelay          Modifier = "__delay"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
+	ModifierIfMissing      Modifier = "__ifmissing"
 	ModifierOnce           Modifier = "__once"
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
@@ -369,6 +371,28 @@ func Show(expression string) g.Node {
 	return data("show", expression)
 }
 
+// Signals patches (adds, updates or removes) one or more signals into the existing signals. Values defined later in the DOM tree override those defined earlier.
+//
+// <div data-signals="{foo: {bar: 1, baz: 2}}"></div>
+//
+// Setting a signal's value to null will remove the signal.
+//
+// <div data-signals="{foo: null}"></div>
+//
+// Signals beginning with an underscore are not included in requests to the backend by default.
+// You can opt to include them by modifying the value of the filterSignals option.
+//
+// Signal names cannot begin with nor contain a double underscore (__), due to its use as a modifier delimiter.
+//
+// See https://data-star.dev/reference/attributes#data-signals
+func Signals(signals map[string]any, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("signals"+nameWithModifiers, toSignals(signals))
+}
+
 // Style sets the value of inline CSS styles on an element based on an expression, and keeps them in sync.
 //
 // The data-style attribute can be used to set multiple style properties on an element using a set of key-value pairs,
@@ -438,6 +462,14 @@ func toFilter(filter Filter) string {
 	}
 	v += "}"
 	return v
+}
+
+func toSignals(signals map[string]any) string {
+	b, err := json.Marshal(signals)
+	if err != nil {
+		panic(fmt.Sprintf("failed to marshal signals: %v", err))
+	}
+	return string(b)
 }
 
 func data(name string, value ...string) g.Node {
