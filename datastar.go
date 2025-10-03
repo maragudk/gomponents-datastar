@@ -369,6 +369,41 @@ func Show(expression string) g.Node {
 	return data("show", expression)
 }
 
+// Style sets the value of inline CSS styles on an element based on an expression, and keeps them in sync.
+//
+// The data-style attribute can be used to set multiple style properties on an element using a set of key-value pairs,
+// where the keys represent CSS property names and the values represent expressions.
+//
+//	<div data-style="{
+//	  display: $hiding ? 'none' : 'flex',
+//	  flexDirection: 'column',
+//	  color: $usingRed ? 'red' : 'green'
+//	}"></div>
+//
+// Style properties can be specified in either camelCase (e.g., backgroundColor) or kebab-case (e.g., background-color).
+// They will be automatically converted to the appropriate format.
+//
+// Empty string, null, undefined, or false values will restore the original inline style value if one existed,
+// or remove the style property if there was no initial value. This allows you to use the logical AND operator (&&)
+// for conditional styles: $condition && 'value' will apply the style when the condition is true and restore the original value when false.
+//
+// <!-- When $x is false, color remains red from inline style -->
+// <div style="color: red;" data-style-color="$x && 'green'"></div>
+//
+// <!-- When $hiding is true, display becomes none; when false, reverts to flex from inline style -->
+// <div style="display: flex;" data-style-display="$hiding && 'none'"></div>
+//
+// The plugin tracks initial inline style values and restores them when data-style expressions become falsy or during cleanup.
+// This ensures existing inline styles are preserved and only the dynamic changes are managed by Datastar.
+//
+// See https://data-star.dev/reference/attributes#data-style
+func Style(pairs ...string) g.Node {
+	if len(pairs)%2 == 1 {
+		panic("each style property must have a value")
+	}
+	return data("style", toObject(pairs))
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
