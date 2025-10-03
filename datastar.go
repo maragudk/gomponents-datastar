@@ -26,6 +26,7 @@ const (
 	ModifierDelay          Modifier = "__delay"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
+	ModifierIfMissing      Modifier = "__ifmissing"
 	ModifierOnce           Modifier = "__once"
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
@@ -374,7 +375,7 @@ func Show(expression string) g.Node {
 //
 // <div data-signals="{foo: {bar: 1, baz: 2}}"></div>
 //
-// Setting a signal’s value to null will remove the signal.
+// Setting a signal's value to null will remove the signal.
 //
 // <div data-signals="{foo: null}"></div>
 //
@@ -384,8 +385,12 @@ func Show(expression string) g.Node {
 // Signal names cannot begin with nor contain a double underscore (__), due to its use as a modifier delimiter.
 //
 // See https://data-star.dev/reference/attributes#data-signals
-func Signals(signals map[string]any) g.Node {
-	return data("signals", toSignals(signals))
+func Signals(signals map[string]any, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("signals"+nameWithModifiers, toSignals(signals))
 }
 
 // Style sets the value of inline CSS styles on an element based on an expression, and keeps them in sync.
