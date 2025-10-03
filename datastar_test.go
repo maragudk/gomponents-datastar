@@ -273,6 +273,13 @@ func TestRef(t *testing.T) {
 	}
 }
 
+func TestShow(t *testing.T) {
+	t.Run(`should output data-show="$foo"`, func(t *testing.T) {
+		n := Div(ds.Show("$foo"))
+		assert.Equal(t, `<div data-show="$foo"></div>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
