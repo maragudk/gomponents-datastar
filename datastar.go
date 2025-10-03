@@ -30,6 +30,7 @@ const (
 	ModifierPrevent        Modifier = "__prevent"
 	ModifierSelf           Modifier = "__self"
 	ModifierStop           Modifier = "__stop"
+	ModifierTerse          Modifier = "__terse"
 	ModifierThrottle       Modifier = "__throttle"
 	ModifierViewTransition Modifier = "__viewtransition"
 	ModifierWindow         Modifier = "__window"
@@ -200,6 +201,34 @@ func Indicator(name string, modifiers ...Modifier) g.Node {
 		nameWithModifiers += string(modifier)
 	}
 	return data("indicator"+nameWithModifiers, name)
+}
+
+// JSONSignals sets the text content of an element to a reactive JSON stringified version of signals.
+// Useful when troubleshooting an issue.
+//
+// You can optionally provide a filter object to include or exclude specific signals using regular expressions.
+//
+// <!-- Only show signals that include "user" in their path -->
+// <pre data-json-signals="{include: /user/}"></pre>
+//
+// <!-- Show all signals except those ending with "temp" -->
+// <pre data-json-signals="{exclude: /temp$/}"></pre>
+//
+// <!-- Combine include and exclude filters -->
+// <pre data-json-signals="{include: /^app/, exclude: /password/}"></pre>
+//
+// <pre data-json-signals></pre>
+//
+// See https://data-star.dev/reference/attributes#data-json-signals
+func JSONSignals(filter Filter, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	if filter.Include == "" && filter.Exclude == "" {
+		return data("json-signals" + nameWithModifiers)
+	}
+	return data("json-signals"+nameWithModifiers, toFilter(filter))
 }
 
 // On attaches an event listener to an element, executing an expression whenever the event is triggered.

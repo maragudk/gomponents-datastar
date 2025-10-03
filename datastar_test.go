@@ -92,6 +92,38 @@ func TestIgnoreMorph(t *testing.T) {
 	})
 }
 
+func TestJSONSignals(t *testing.T) {
+	t.Run(`should output data-json-signals`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{}))
+		assert.Equal(t, `<pre data-json-signals></pre>`, n)
+	})
+
+	t.Run(`should output data-json-signals__terse`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{}, ds.ModifierTerse))
+		assert.Equal(t, `<pre data-json-signals__terse></pre>`, n)
+	})
+
+	t.Run(`should output data-json-signals="{include: /user/}"`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{Include: "/user/"}))
+		assert.Equal(t, `<pre data-json-signals="{include: /user/}"></pre>`, n)
+	})
+
+	t.Run(`should output data-json-signals="{exclude: /temp$/}"`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{Exclude: "/temp$/"}))
+		assert.Equal(t, `<pre data-json-signals="{exclude: /temp$/}"></pre>`, n)
+	})
+
+	t.Run(`should output data-json-signals="{include: /^app/, exclude: /password/}"`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{Include: "/^app/", Exclude: "/password/"}))
+		assert.Equal(t, `<pre data-json-signals="{include: /^app/, exclude: /password/}"></pre>`, n)
+	})
+
+	t.Run(`should output data-json-signals__terse="{include: /counter/}"`, func(t *testing.T) {
+		n := Pre(ds.JSONSignals(ds.Filter{Include: "/counter/"}, ds.ModifierTerse))
+		assert.Equal(t, `<pre data-json-signals__terse="{include: /counter/}"></pre>`, n)
+	})
+}
+
 func TestIndicator(t *testing.T) {
 	t.Run(`should output data-indicator="fetching"`, func(t *testing.T) {
 		n := Button(ds.Indicator("fetching"))
