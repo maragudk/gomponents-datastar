@@ -10,6 +10,42 @@ import (
 	"maragu.dev/gomponents/html"
 )
 
+type Modifier string
+
+const (
+	ModifierCapture        Modifier = "__capture"
+	ModifierCase           Modifier = "__case"
+	ModifierDebounce       Modifier = "__debounce"
+	ModifierDelay          Modifier = "__delay"
+	ModifierOnce           Modifier = "__once"
+	ModifierOutside        Modifier = "__outside"
+	ModifierPassive        Modifier = "__passive"
+	ModifierPrevent        Modifier = "__prevent"
+	ModifierStop           Modifier = "__stop"
+	ModifierThrottle       Modifier = "__throttle"
+	ModifierViewTransition Modifier = "__viewtransition"
+	ModifierWindow         Modifier = "__window"
+)
+
+const (
+	ModifierCamel     Modifier = ".camel" // Camel case: myEvent
+	ModifierKebab     Modifier = ".kebab" // Kebab case: my-event
+	ModifierLeading   Modifier = ".leading"
+	ModifierNoLeading Modifier = ".noleading"
+	ModifierNoTrail   Modifier = ".notrail"
+	ModifierPascal    Modifier = ".pascal" // Pascal case: MyEvent
+	ModifierSnake     Modifier = ".snake"  // Snake case: my_event
+	ModifierTrail     Modifier = ".trail"
+)
+
+// ModifierDuration outputs millisecond values for durations under 1 second, otherwise second values.
+func ModifierDuration(d time.Duration) Modifier {
+	if d.Seconds() < 1 {
+		return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
+	}
+	return Modifier(fmt.Sprintf(".%vs", int(d.Seconds())))
+}
+
 // Attr sets the value of any HTML attribute to an expression, and keeps it in sync.
 //
 // <div data-attr-title="$foo"></div>
@@ -95,6 +131,16 @@ func Computed(name, expression string, modifiers ...Modifier) g.Node {
 	return html.Data("computed-"+nameWithModifiers, expression)
 }
 
+// Effect executes an expression on page load and whenever any signals in the expression change.
+// This is useful for performing side effects, such as updating other signals, making requests to the backend, or manipulating the DOM.
+//
+// <div data-effect="$foo = $bar + $baz"></div>
+//
+// See https://data-star.dev/reference/attributes#data-effect
+func Effect(expression string) g.Node {
+	return html.Data("effect", expression)
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
@@ -102,42 +148,6 @@ func Computed(name, expression string, modifiers ...Modifier) g.Node {
 // See https://data-star.dev/reference/attributes#data-text
 func Text(v string) g.Node {
 	return html.Data("text", v)
-}
-
-type Modifier string
-
-const (
-	ModifierCapture        Modifier = "__capture"
-	ModifierCase           Modifier = "__case"
-	ModifierDebounce       Modifier = "__debounce"
-	ModifierDelay          Modifier = "__delay"
-	ModifierOnce           Modifier = "__once"
-	ModifierOutside        Modifier = "__outside"
-	ModifierPassive        Modifier = "__passive"
-	ModifierPrevent        Modifier = "__prevent"
-	ModifierStop           Modifier = "__stop"
-	ModifierThrottle       Modifier = "__throttle"
-	ModifierViewTransition Modifier = "__viewtransition"
-	ModifierWindow         Modifier = "__window"
-)
-
-const (
-	ModifierCamel     Modifier = ".camel" // Camel case: myEvent
-	ModifierKebab     Modifier = ".kebab" // Kebab case: my-event
-	ModifierLeading   Modifier = ".leading"
-	ModifierNoLeading Modifier = ".noleading"
-	ModifierNoTrail   Modifier = ".notrail"
-	ModifierPascal    Modifier = ".pascal" // Pascal case: MyEvent
-	ModifierSnake     Modifier = ".snake"  // Snake case: my_event
-	ModifierTrail     Modifier = ".trail"
-)
-
-// ModifierDuration outputs millisecond values for durations under 1 second, otherwise second values.
-func ModifierDuration(d time.Duration) Modifier {
-	if d.Seconds() < 1 {
-		return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
-	}
-	return Modifier(fmt.Sprintf(".%vs", int(d.Seconds())))
 }
 
 // On attaches an event listener to an element, executing an expression whenever the event is triggered.
