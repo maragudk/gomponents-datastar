@@ -85,6 +85,13 @@ func TestIgnore(t *testing.T) {
 	})
 }
 
+func TestIgnoreMorph(t *testing.T) {
+	t.Run(`should output data-ignore-morph`, func(t *testing.T) {
+		n := Div(ds.IgnoreMorph())
+		assert.Equal(t, `<div data-ignore-morph></div>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
