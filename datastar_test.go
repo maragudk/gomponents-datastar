@@ -1,6 +1,7 @@
 package datastar_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -324,4 +325,204 @@ func TestText(t *testing.T) {
 		n := Div(ds.Text("$foo"))
 		assert.Equal(t, `<div data-text="$foo"></div>`, n)
 	})
+}
+
+func ExampleAttr() {
+	fmt.Print(Div(ds.Attr("title", "$title")))
+	// Output: <div data-attr="{title: $title}"></div>
+}
+
+func ExampleAttr_multiple() {
+	fmt.Print(Div(ds.Attr("title", "$title", "id", "$id")))
+	// Output: <div data-attr="{title: $title, id: $id}"></div>
+}
+
+func ExampleBind() {
+	fmt.Print(Input(ds.Bind("foo")))
+	// Output: <input data-bind="foo">
+}
+
+func ExampleClass() {
+	fmt.Print(Div(ds.Class("hidden", "$hidden")))
+	// Output: <div data-class="{hidden: $hidden}"></div>
+}
+
+func ExampleClass_multiple() {
+	fmt.Print(Div(ds.Class("hidden", "$hidden", "font-bold", "$bold")))
+	// Output: <div data-class="{hidden: $hidden, font-bold: $bold}"></div>
+}
+
+func ExampleComputed() {
+	fmt.Print(Div(ds.Computed("foo", "$bar + $baz")))
+	// Output: <div data-computed-foo="$bar + $baz"></div>
+}
+
+func ExampleComputed_withModifierCase() {
+	fmt.Print(Div(ds.Computed("foo", "$bar + $baz", ds.ModifierCase, ds.ModifierKebab)))
+	// Output: <div data-computed-foo__case.kebab="$bar + $baz"></div>
+}
+
+func ExampleEffect() {
+	fmt.Print(Div(ds.Effect("$foo = $bar + $baz")))
+	// Output: <div data-effect="$foo = $bar + $baz"></div>
+}
+
+func ExampleIgnore() {
+	fmt.Print(Div(ds.Ignore()))
+	// Output: <div data-ignore></div>
+}
+
+func ExampleIgnore_withModifierSelf() {
+	fmt.Print(Div(ds.Ignore(ds.ModifierSelf)))
+	// Output: <div data-ignore__self></div>
+}
+
+func ExampleIgnoreMorph() {
+	fmt.Print(Div(ds.IgnoreMorph()))
+	// Output: <div data-ignore-morph></div>
+}
+
+func ExampleIndicator() {
+	fmt.Print(Button(ds.Indicator("fetching")))
+	// Output: <button data-indicator="fetching"></button>
+}
+
+func ExampleIndicator_withModifierCase() {
+	fmt.Print(Button(ds.Indicator("fetching", ds.ModifierCase, ds.ModifierKebab)))
+	// Output: <button data-indicator__case.kebab="fetching"></button>
+}
+
+func ExampleJSONSignals() {
+	fmt.Print(Pre(ds.JSONSignals(ds.Filter{})))
+	// Output: <pre data-json-signals></pre>
+}
+
+func ExampleJSONSignals_withFilter() {
+	fmt.Print(Pre(ds.JSONSignals(ds.Filter{Include: "/user/"})))
+	// Output: <pre data-json-signals="{include: /user/}"></pre>
+}
+
+func ExampleJSONSignals_withModifier() {
+	fmt.Print(Pre(ds.JSONSignals(ds.Filter{}, ds.ModifierTerse)))
+	// Output: <pre data-json-signals__terse></pre>
+}
+
+func ExampleOn_click() {
+	fmt.Print(Button(ds.On("click", "$foo = ''")))
+	// Output: <button data-on-click="$foo = &#39;&#39;"></button>
+}
+
+func ExampleOn_withModifiers() {
+	fmt.Print(Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading)))
+	// Output: <button data-on-click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
+}
+
+func ExampleOnIntersect() {
+	fmt.Print(Div(ds.OnIntersect("$intersected = true")))
+	// Output: <div data-on-intersect="$intersected = true"></div>
+}
+
+func ExampleOnIntersect_withModifiers() {
+	fmt.Print(Div(ds.OnIntersect("$fullyIntersected = true", ds.ModifierOnce, ds.ModifierFull)))
+	// Output: <div data-on-intersect__once__full="$fullyIntersected = true"></div>
+}
+
+func ExampleOnInterval() {
+	fmt.Print(Div(ds.OnInterval("$count++")))
+	// Output: <div data-on-interval="$count++"></div>
+}
+
+func ExampleOnInterval_withDuration() {
+	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond))))
+	// Output: <div data-on-interval.500ms="$count++"></div>
+}
+
+func ExampleOnLoad() {
+	fmt.Print(Div(ds.OnLoad("$count = 1")))
+	// Output: <div data-on-load="$count = 1"></div>
+}
+
+func ExampleOnLoad_withDelay() {
+	fmt.Print(Div(ds.OnLoad("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond))))
+	// Output: <div data-on-load__delay.500ms="$count = 1"></div>
+}
+
+func ExampleOnSignalPatch() {
+	fmt.Print(Div(ds.OnSignalPatch("console.log('Signal patch:', patch)")))
+	// Output: <div data-on-signal-patch="console.log(&#39;Signal patch:&#39;, patch)"></div>
+}
+
+func ExampleOnSignalPatch_withModifiers() {
+	fmt.Print(Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond))))
+	// Output: <div data-on-signal-patch__debounce.500ms="doSomething()"></div>
+}
+
+func ExampleOnSignalPatchFilter() {
+	fmt.Print(Div(ds.OnSignalPatchFilter(ds.Filter{Include: "/^counter$/"})))
+	// Output: <div data-on-signal-patch-filter="{include: /^counter$/}"></div>
+}
+
+func ExampleOnSignalPatchFilter_withExclude() {
+	fmt.Print(Div(ds.OnSignalPatchFilter(ds.Filter{Include: "/user/", Exclude: "/password/"})))
+	// Output: <div data-on-signal-patch-filter="{include: /user/, exclude: /password/}"></div>
+}
+
+func ExamplePreserveAttr() {
+	fmt.Print(Details(ds.PreserveAttr("open")))
+	// Output: <details data-preserve-attr="open"></details>
+}
+
+func ExamplePreserveAttr_multiple() {
+	fmt.Print(Details(ds.PreserveAttr("open", "class")))
+	// Output: <details data-preserve-attr="open class"></details>
+}
+
+func ExampleRef() {
+	fmt.Print(Div(ds.Ref("foo")))
+	// Output: <div data-ref="foo"></div>
+}
+
+func ExampleRef_withModifierCase() {
+	fmt.Print(Div(ds.Ref("foo", ds.ModifierCase, ds.ModifierKebab)))
+	// Output: <div data-ref__case.kebab="foo"></div>
+}
+
+func ExampleShow() {
+	fmt.Print(Div(ds.Show("$foo")))
+	// Output: <div data-show="$foo"></div>
+}
+
+func ExampleSignals() {
+	fmt.Print(Div(ds.Signals(map[string]any{"foo": 1})))
+	// Output: <div data-signals="{&#34;foo&#34;:1}"></div>
+}
+
+func ExampleSignals_withModifierIfMissing() {
+	fmt.Print(Div(ds.Signals(map[string]any{"foo": 1}, ds.ModifierIfMissing)))
+	// Output: <div data-signals__ifmissing="{&#34;foo&#34;:1}"></div>
+}
+
+func ExampleStyle() {
+	fmt.Print(Div(ds.Style("display", "$hiding ? 'none' : 'flex'")))
+	// Output: <div data-style="{display: $hiding ? &#39;none&#39; : &#39;flex&#39;}"></div>
+}
+
+func ExampleStyle_multiple() {
+	fmt.Print(Div(ds.Style("display", "$hiding ? 'none' : 'flex'", "color", "$usingRed ? 'red' : 'green'")))
+	// Output: <div data-style="{display: $hiding ? &#39;none&#39; : &#39;flex&#39;, color: $usingRed ? &#39;red&#39; : &#39;green&#39;}"></div>
+}
+
+func ExampleText() {
+	fmt.Print(Div(ds.Text("$foo")))
+	// Output: <div data-text="$foo"></div>
+}
+
+func ExampleModifierDuration_milliseconds() {
+	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond))))
+	// Output: <div data-on-interval.500ms="$count++"></div>
+}
+
+func ExampleModifierDuration_seconds() {
+	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(2*time.Second))))
+	// Output: <div data-on-interval.2s="$count++"></div>
 }
