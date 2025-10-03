@@ -167,7 +167,9 @@ func Ignore(modifiers ...Modifier) g.Node {
 // IgnoreMorph tells the `PatchElements` watcher to skip processing an element and its children when morphing elements.
 //
 // <div data-ignore-morph>
-//     This element will not be morphed.
+//
+//	This element will not be morphed.
+//
 // </div>
 //
 // See https://data-star.dev/reference/attributes#data-ignore-morph
@@ -175,13 +177,14 @@ func IgnoreMorph() g.Node {
 	return data("ignore-morph")
 }
 
-// Indicator creates a signal and sets its value to `true` while a fetch request is in flight, otherwise `false`.
+// Indicator creates a signal and sets its value to `true` while a fetch request is in flight, otherwise `false`. The signal can be used to show a loading indicator.
 //
-// <button data-on-click="@get('/endpoint')" data-indicator-fetching></button>
+// <button data-on-click="@get('/endpoint')" data-indicator="fetching" data-attr-disabled="$fetching"></button>
+// <div data-show="$fetching">Loading...</div>
 //
-// The signal name can be specified in the key (as above), or in the value (as below). This can be useful depending on the templating language you are using.
+// When using data-indicator with a fetch request initiated in a data-on-load attribute, you should ensure that the indicator signal is created before the fetch request is initialized.
 //
-// <button data-on-click="@get('/endpoint')" data-indicator="fetching"></button>
+// <div data-indicator-fetching data-on-load="@get('/endpoint')"></div>
 //
 // See https://data-star.dev/reference/attributes#data-indicator
 func Indicator(name string, modifiers ...Modifier) g.Node {
