@@ -280,6 +280,18 @@ func TestShow(t *testing.T) {
 	})
 }
 
+func TestStyle(t *testing.T) {
+	t.Run(`should output data-style="{display: $hiding ? 'none' : 'flex'}"`, func(t *testing.T) {
+		n := Div(ds.Style("display", "$hiding ? 'none' : 'flex'"))
+		assert.Equal(t, `<div data-style="{display: $hiding ? &#39;none&#39; : &#39;flex&#39;}"></div>`, n)
+	})
+
+	t.Run(`should output data-style="{display: $hiding ? 'none' : 'flex', color: $usingRed ? 'red' : 'green'}"`, func(t *testing.T) {
+		n := Div(ds.Style("display", "$hiding ? 'none' : 'flex'", "color", "$usingRed ? 'red' : 'green'"))
+		assert.Equal(t, `<div data-style="{display: $hiding ? &#39;none&#39; : &#39;flex&#39;, color: $usingRed ? &#39;red&#39; : &#39;green&#39;}"></div>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
