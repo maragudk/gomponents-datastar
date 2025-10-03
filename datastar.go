@@ -73,6 +73,28 @@ func Class(pairs ...string) g.Node {
 	return html.Data("class", toObject(pairs))
 }
 
+// Computed creates a signal that is computed based on an expression. The computed signal is read-only,
+// and its value is automatically updated when any signals in the expression are updated.
+//
+// <div data-computed-foo="$bar + $baz"></div>
+//
+// Computed signals are useful for memoizing expressions containing other signals. Their values can be used in other expressions.
+//
+// <div data-computed-foo="$bar + $baz"></div>
+// <div data-text="$foo"></div>
+//
+// Computed signal expressions must not be used for performing actions (changing other signals, actions, JavaScript functions, etc.).
+// If you need to perform an action in response to a signal change, use the data-effect attribute.
+//
+// See https://data-star.dev/reference/attributes#data-computed
+func Computed(name, expression string, modifiers ...Modifier) g.Node {
+	nameWithModifiers := name
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return html.Data("computed-"+nameWithModifiers, expression)
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>

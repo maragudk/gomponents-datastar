@@ -48,6 +48,31 @@ func TestText(t *testing.T) {
 	})
 }
 
+func TestComputed(t *testing.T) {
+	t.Run(`should output data-computed-foo="$bar + $baz"`, func(t *testing.T) {
+		n := Div(ds.Computed("foo", "$bar + $baz"))
+		assert.Equal(t, `<div data-computed-foo="$bar + $baz"></div>`, n)
+	})
+
+	tests := []struct {
+		name     string
+		modifier ds.Modifier
+		expected string
+	}{
+		{name: `should output data-computed-foo__case.camel="$bar + $baz"`, modifier: ds.ModifierCamel, expected: `<div data-computed-foo__case.camel="$bar + $baz"></div>`},
+		{name: `should output data-computed-foo__case.kebab="$bar + $baz"`, modifier: ds.ModifierKebab, expected: `<div data-computed-foo__case.kebab="$bar + $baz"></div>`},
+		{name: `should output data-computed-foo__case.snake="$bar + $baz"`, modifier: ds.ModifierSnake, expected: `<div data-computed-foo__case.snake="$bar + $baz"></div>`},
+		{name: `should output data-computed-foo__case.pascal="$bar + $baz"`, modifier: ds.ModifierPascal, expected: `<div data-computed-foo__case.pascal="$bar + $baz"></div>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n := Div(ds.Computed("foo", "$bar + $baz", ds.ModifierCase, test.modifier))
+			assert.Equal(t, test.expected, n)
+		})
+	}
+}
+
 func TestOn(t *testing.T) {
 	t.Run(`should output data-on-click="$foo = ''"`, func(t *testing.T) {
 		n := Button(ds.On("click", "$foo = ''"))
