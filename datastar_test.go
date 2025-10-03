@@ -146,6 +146,35 @@ func TestOnIntersect(t *testing.T) {
 	})
 }
 
+func TestOnInterval(t *testing.T) {
+	t.Run(`should output data-on-interval="$count++"`, func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++"))
+		assert.Equal(t, `<div data-on-interval="$count++"></div>`, n)
+	})
+
+	t.Run(`should output data-on-interval.500ms="$count++"`, func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond)))
+		assert.Equal(t, `<div data-on-interval.500ms="$count++"></div>`, n)
+	})
+
+	t.Run(`should output data-on-interval.2s="$count++"`, func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration(2*time.Second)))
+		assert.Equal(t, `<div data-on-interval.2s="$count++"></div>`, n)
+	})
+}
+
+func TestOnLoad(t *testing.T) {
+	t.Run(`should output data-on-load="$count = 1"`, func(t *testing.T) {
+		n := Div(ds.OnLoad("$count = 1"))
+		assert.Equal(t, `<div data-on-load="$count = 1"></div>`, n)
+	})
+
+	t.Run(`should output data-on-load__delay.500ms="$count = 1"`, func(t *testing.T) {
+		n := Div(ds.OnLoad("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond)))
+		assert.Equal(t, `<div data-on-load__delay.500ms="$count = 1"></div>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
