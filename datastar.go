@@ -17,6 +17,8 @@ const (
 	ModifierCase           Modifier = "__case"
 	ModifierDebounce       Modifier = "__debounce"
 	ModifierDelay          Modifier = "__delay"
+	ModifierFull           Modifier = "__full"
+	ModifierHalf           Modifier = "__half"
 	ModifierOnce           Modifier = "__once"
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
@@ -195,18 +197,9 @@ func Indicator(name string, modifiers ...Modifier) g.Node {
 	return data("indicator"+nameWithModifiers, name)
 }
 
-// Text binds the text content of an element to an expression.
-//
-// <div data-text="$foo"></div>
-//
-// See https://data-star.dev/reference/attributes#data-text
-func Text(v string) g.Node {
-	return data("text", v)
-}
-
 // On attaches an event listener to an element, executing an expression whenever the event is triggered.
 //
-// <button data-on-click="$foo = ”">Reset</button>
+// <button data-on-click="$foo = ' '">Reset</button>
 //
 // An evt variable that represents the event object is available in the expression.
 //
@@ -221,6 +214,28 @@ func On(event, expression string, modifiers ...Modifier) g.Node {
 		eventWithModifiers += string(modifier)
 	}
 	return data("on-"+eventWithModifiers, expression)
+}
+
+// OnIntersect runs an expression when the element intersects with the viewport.
+//
+// <div data-on-intersect="$intersected = true"></div>
+//
+// See https://data-star.dev/reference/attributes#data-on-intersect
+func OnIntersect(expression string, modifiers ...Modifier) g.Node {
+	eventWithModifiers := ""
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return data("on-intersect"+eventWithModifiers, expression)
+}
+
+// Text binds the text content of an element to an expression.
+//
+// <div data-text="$foo"></div>
+//
+// See https://data-star.dev/reference/attributes#data-text
+func Text(v string) g.Node {
+	return data("text", v)
 }
 
 func toObject(pairs []string) string {
