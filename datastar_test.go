@@ -117,13 +117,6 @@ func TestIndicator(t *testing.T) {
 	}
 }
 
-func TestText(t *testing.T) {
-	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
-		n := Div(ds.Text("$foo"))
-		assert.Equal(t, `<div data-text="$foo"></div>`, n)
-	})
-}
-
 func TestOn(t *testing.T) {
 	t.Run(`should output data-on-click="$foo = ''"`, func(t *testing.T) {
 		n := Button(ds.On("click", "$foo = ''"))
@@ -133,5 +126,29 @@ func TestOn(t *testing.T) {
 	t.Run(`should output data-on-click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
 		n := Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading))
 		assert.Equal(t, `<button data-on-click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
+	})
+}
+
+func TestOnIntersect(t *testing.T) {
+	t.Run(`should output data-on-intersect="$intersected = true"`, func(t *testing.T) {
+		n := Div(ds.OnIntersect("$intersected = true"))
+		assert.Equal(t, `<div data-on-intersect="$intersected = true"></div>`, n)
+	})
+
+	t.Run(`should output data-on-intersect__once__full="$fullyIntersected = true"`, func(t *testing.T) {
+		n := Div(ds.OnIntersect("$fullyIntersected = true", ds.ModifierOnce, ds.ModifierFull))
+		assert.Equal(t, `<div data-on-intersect__once__full="$fullyIntersected = true"></div>`, n)
+	})
+
+	t.Run(`should output data-on-intersect__half="$halfIntersected = true"`, func(t *testing.T) {
+		n := Div(ds.OnIntersect("$halfIntersected = true", ds.ModifierHalf))
+		assert.Equal(t, `<div data-on-intersect__half="$halfIntersected = true"></div>`, n)
+	})
+}
+
+func TestText(t *testing.T) {
+	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
+		n := Div(ds.Text("$foo"))
+		assert.Equal(t, `<div data-text="$foo"></div>`, n)
 	})
 }
