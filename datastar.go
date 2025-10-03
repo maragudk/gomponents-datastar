@@ -229,7 +229,36 @@ func OnIntersect(expression string, modifiers ...Modifier) g.Node {
 	return data("on-intersect"+eventWithModifiers, expression)
 }
 
+// OnInterval runs an expression at a regular interval. The interval duration defaults to one second and can be modified using the __duration modifier.
+//
+// <div data-on-interval="$count++"></div>
+//
+// See https://data-star.dev/reference/attributes#data-on-interval
+func OnInterval(expression string, modifiers ...Modifier) g.Node {
+	eventWithModifiers := ""
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return data("on-interval"+eventWithModifiers, expression)
+}
+
+// OnLoad runs an expression when an element is loaded into the DOM.
+//
+// <div data-on-load="$count = 1"></div>
+//
+// See https://data-star.dev/reference/attributes#data-on-load
+func OnLoad(expression string, modifiers ...Modifier) g.Node {
+	eventWithModifiers := ""
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return data("on-load"+eventWithModifiers, expression)
+}
+
 // Text binds the text content of an element to an expression.
+//
+// The expression contained in the data-on-load attribute is executed when the element attribute is loaded into the DOM.
+// This can happen on page load, when an element is patched into the DOM, and any time the attribute is modified (via a backend action or otherwise).
 //
 // <div data-text="$foo"></div>
 //
