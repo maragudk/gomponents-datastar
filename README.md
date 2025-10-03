@@ -7,7 +7,7 @@
 
 [Datastar](https://data-star.dev) attributes and helpers for [gomponents](https://www.gomponents.com).
 
-⚠️ This library is still incomplete and being developed. Stay tuned for updates! ⚠️
+⚠️ This library is still being developed, but mostly feature-complete. Make sure to create issues here on Github if you find any! ⚠️
 
 ```shell
 go get maragu.dev/gomponents-datastar
