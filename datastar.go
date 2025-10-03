@@ -21,6 +21,7 @@ const (
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
 	ModifierPrevent        Modifier = "__prevent"
+	ModifierSelf           Modifier = "__self"
 	ModifierStop           Modifier = "__stop"
 	ModifierThrottle       Modifier = "__throttle"
 	ModifierViewTransition Modifier = "__viewtransition"
@@ -60,7 +61,7 @@ func Attr(pairs ...string) g.Node {
 	if len(pairs)%2 == 1 {
 		panic("each attribute name must have a value")
 	}
-	return html.Data("attr", toObject(pairs))
+	return data("attr", toObject(pairs))
 }
 
 // Bind creates a signal (if one doesn’t already exist) and sets up two-way data binding between it and an element’s value.
@@ -87,7 +88,7 @@ func Attr(pairs ...string) g.Node {
 //
 // See https://data-star.dev/reference/attributes#data-bind
 func Bind(name string) g.Node {
-	return html.Data("bind", name)
+	return data("bind", name)
 }
 
 // Class adds or removes a class to or from an element based on an expression.
@@ -106,7 +107,7 @@ func Class(pairs ...string) g.Node {
 	if len(pairs)%2 == 1 {
 		panic("each class name must have a value")
 	}
-	return html.Data("class", toObject(pairs))
+	return data("class", toObject(pairs))
 }
 
 // Computed creates a signal that is computed based on an expression. The computed signal is read-only,
@@ -128,7 +129,7 @@ func Computed(name, expression string, modifiers ...Modifier) g.Node {
 	for _, modifier := range modifiers {
 		nameWithModifiers += string(modifier)
 	}
-	return html.Data("computed-"+nameWithModifiers, expression)
+	return data("computed-"+nameWithModifiers, expression)
 }
 
 // Effect executes an expression on page load and whenever any signals in the expression change.
@@ -138,7 +139,29 @@ func Computed(name, expression string, modifiers ...Modifier) g.Node {
 //
 // See https://data-star.dev/reference/attributes#data-effect
 func Effect(expression string) g.Node {
-	return html.Data("effect", expression)
+	return data("effect", expression)
+}
+
+// Ignore tells Datastar to ignore an element and its descendants.
+// Datastar walks the entire DOM and applies plugins to each element it encounters.
+// It's possible to tell Datastar to ignore an element and its descendants by placing a `data-ignore` attribute on it.
+// This is useful for preventing naming conflicts with third-party libraries or avoiding processing elements with potentially unsafe user input.
+//
+// <div data-ignore data-show-thirdpartylib="">
+//
+//	<div>
+//	    Datastar will not process this element.
+//	</div>
+//
+// </div>
+//
+// See https://data-star.dev/reference/attributes#data-ignore
+func Ignore(modifiers ...Modifier) g.Node {
+	eventWithModifiers := ""
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return data("ignore" + eventWithModifiers)
 }
 
 // Text binds the text content of an element to an expression.
@@ -147,7 +170,7 @@ func Effect(expression string) g.Node {
 //
 // See https://data-star.dev/reference/attributes#data-text
 func Text(v string) g.Node {
-	return html.Data("text", v)
+	return data("text", v)
 }
 
 // On attaches an event listener to an element, executing an expression whenever the event is triggered.
@@ -166,7 +189,7 @@ func On(event, expression string, modifiers ...Modifier) g.Node {
 	for _, modifier := range modifiers {
 		eventWithModifiers += string(modifier)
 	}
-	return html.Data("on-"+eventWithModifiers, expression)
+	return data("on-"+eventWithModifiers, expression)
 }
 
 func toObject(pairs []string) string {
@@ -179,4 +202,11 @@ func toObject(pairs []string) string {
 	}
 	v += "}"
 	return v
+}
+
+func data(name string, value ...string) g.Node {
+	if len(value) > 0 {
+		return html.Data(name, value[0])
+	}
+	return g.Attr("data-" + name)
 }

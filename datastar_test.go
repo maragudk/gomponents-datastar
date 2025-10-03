@@ -23,9 +23,9 @@ func TestAttr(t *testing.T) {
 }
 
 func TestBind(t *testing.T) {
-	t.Run(`should output data-bind="hat"`, func(t *testing.T) {
-		n := Input(ds.Bind("hat"))
-		assert.Equal(t, `<input data-bind="hat">`, n)
+	t.Run(`should output data-bind="foo"`, func(t *testing.T) {
+		n := Input(ds.Bind("foo"))
+		assert.Equal(t, `<input data-bind="foo">`, n)
 	})
 }
 
@@ -70,6 +70,18 @@ func TestEffect(t *testing.T) {
 	t.Run(`should output data-effect="$foo = $bar + $baz"`, func(t *testing.T) {
 		n := Div(ds.Effect("$foo = $bar + $baz"))
 		assert.Equal(t, `<div data-effect="$foo = $bar + $baz"></div>`, n)
+	})
+}
+
+func TestIgnore(t *testing.T) {
+	t.Run(`should output data-ignore`, func(t *testing.T) {
+		n := Div(ds.Ignore())
+		assert.Equal(t, `<div data-ignore></div>`, n)
+	})
+
+	t.Run(`should output data-ignore__self=""`, func(t *testing.T) {
+		n := Div(ds.Ignore(ds.ModifierSelf))
+		assert.Equal(t, `<div data-ignore__self></div>`, n)
 	})
 }
 
