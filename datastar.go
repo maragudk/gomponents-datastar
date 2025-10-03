@@ -3,6 +3,7 @@
 package datastar
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -369,6 +370,15 @@ func Show(expression string) g.Node {
 	return data("show", expression)
 }
 
+// Signals adds, updates, or removes one or more signals in the existing signals collection.
+//
+// <div data-signals="{foo: 1, bar: 2}"></div>
+//
+// See https://data-star.dev/reference/attributes#data-signals
+func Signals(signals map[string]any) g.Node {
+	return data("signals", toSignals(signals))
+}
+
 // Style sets the value of inline CSS styles on an element based on an expression, and keeps them in sync.
 //
 // The data-style attribute can be used to set multiple style properties on an element using a set of key-value pairs,
@@ -438,6 +448,14 @@ func toFilter(filter Filter) string {
 	}
 	v += "}"
 	return v
+}
+
+func toSignals(signals map[string]any) string {
+	b, err := json.Marshal(signals)
+	if err != nil {
+		panic(fmt.Sprintf("failed to marshal signals: %v", err))
+	}
+	return string(b)
 }
 
 func data(name string, value ...string) g.Node {
