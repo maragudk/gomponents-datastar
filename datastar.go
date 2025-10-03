@@ -244,6 +244,9 @@ func OnInterval(expression string, modifiers ...Modifier) g.Node {
 
 // OnLoad runs an expression when an element is loaded into the DOM.
 //
+// The expression contained in the data-on-load attribute is executed when the element attribute is loaded into the DOM.
+// This can happen on page load, when an element is patched into the DOM, and any time the attribute is modified (via a backend action or otherwise).
+//
 // <div data-on-load="$count = 1"></div>
 //
 // See https://data-star.dev/reference/attributes#data-on-load
@@ -256,9 +259,6 @@ func OnLoad(expression string, modifiers ...Modifier) g.Node {
 }
 
 // Text binds the text content of an element to an expression.
-//
-// The expression contained in the data-on-load attribute is executed when the element attribute is loaded into the DOM.
-// This can happen on page load, when an element is patched into the DOM, and any time the attribute is modified (via a backend action or otherwise).
 //
 // <div data-text="$foo"></div>
 //
