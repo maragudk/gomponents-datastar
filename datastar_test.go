@@ -92,6 +92,31 @@ func TestIgnoreMorph(t *testing.T) {
 	})
 }
 
+func TestIndicator(t *testing.T) {
+	t.Run(`should output data-indicator="fetching"`, func(t *testing.T) {
+		n := Button(ds.Indicator("fetching"))
+		assert.Equal(t, `<button data-indicator="fetching"></button>`, n)
+	})
+
+	tests := []struct {
+		name     string
+		modifier ds.Modifier
+		expected string
+	}{
+		{name: `should output data-indicator__case.camel="fetching"`, modifier: ds.ModifierCamel, expected: `<button data-indicator__case.camel="fetching"></button>`},
+		{name: `should output data-indicator__case.kebab="fetching"`, modifier: ds.ModifierKebab, expected: `<button data-indicator__case.kebab="fetching"></button>`},
+		{name: `should output data-indicator__case.snake="fetching"`, modifier: ds.ModifierSnake, expected: `<button data-indicator__case.snake="fetching"></button>`},
+		{name: `should output data-indicator__case.pascal="fetching"`, modifier: ds.ModifierPascal, expected: `<button data-indicator__case.pascal="fetching"></button>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n := Button(ds.Indicator("fetching", ds.ModifierCase, test.modifier))
+			assert.Equal(t, test.expected, n)
+		})
+	}
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
