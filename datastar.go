@@ -370,9 +370,18 @@ func Show(expression string) g.Node {
 	return data("show", expression)
 }
 
-// Signals adds, updates, or removes one or more signals in the existing signals collection.
+// Signals patches (adds, updates or removes) one or more signals into the existing signals. Values defined later in the DOM tree override those defined earlier.
 //
-// <div data-signals="{foo: 1, bar: 2}"></div>
+// <div data-signals="{foo: {bar: 1, baz: 2}}"></div>
+//
+// Setting a signal’s value to null will remove the signal.
+//
+// <div data-signals="{foo: null}"></div>
+//
+// Signals beginning with an underscore are not included in requests to the backend by default.
+// You can opt to include them by modifying the value of the filterSignals option.
+//
+// Signal names cannot begin with nor contain a double underscore (__), due to its use as a modifier delimiter.
 //
 // See https://data-star.dev/reference/attributes#data-signals
 func Signals(signals map[string]any) g.Node {
