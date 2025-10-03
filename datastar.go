@@ -164,6 +164,17 @@ func Ignore(modifiers ...Modifier) g.Node {
 	return data("ignore" + eventWithModifiers)
 }
 
+// IgnoreMorph tells the `PatchElements` watcher to skip processing an element and its children when morphing elements.
+//
+// <div data-ignore-morph>
+//     This element will not be morphed.
+// </div>
+//
+// See https://data-star.dev/reference/attributes#data-ignore-morph
+func IgnoreMorph() g.Node {
+	return data("ignore-morph")
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
