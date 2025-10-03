@@ -338,13 +338,13 @@ func PreserveAttr(attrs ...string) g.Node {
 	return data("preserve-attr", strings.Join(attrs, " "))
 }
 
-// Ref creates a signal that is a reference to the HTML element.
+// Ref creates a new signal that is a reference to the element on which the data attribute is placed.
 //
 // <div data-ref="foo"></div>
 //
-// The signal name can be specified in the key (as above), or in the value (as below). This can be useful depending on the templating language you are using.
+// The signal value can then be used to reference the element.
 //
-// <div data-ref-foo></div>
+// $foo is a reference to a <span data-text="$foo.tagName"></span> element
 //
 // See https://data-star.dev/reference/attributes#data-ref
 func Ref(name string, modifiers ...Modifier) g.Node {
