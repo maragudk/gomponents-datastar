@@ -41,13 +41,6 @@ func TestClass(t *testing.T) {
 	})
 }
 
-func TestText(t *testing.T) {
-	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
-		n := Div(ds.Text("$foo"))
-		assert.Equal(t, `<div data-text="$foo"></div>`, n)
-	})
-}
-
 func TestComputed(t *testing.T) {
 	t.Run(`should output data-computed-foo="$bar + $baz"`, func(t *testing.T) {
 		n := Div(ds.Computed("foo", "$bar + $baz"))
@@ -71,6 +64,20 @@ func TestComputed(t *testing.T) {
 			assert.Equal(t, test.expected, n)
 		})
 	}
+}
+
+func TestEffect(t *testing.T) {
+	t.Run(`should output data-effect="$foo = $bar + $baz"`, func(t *testing.T) {
+		n := Div(ds.Effect("$foo = $bar + $baz"))
+		assert.Equal(t, `<div data-effect="$foo = $bar + $baz"></div>`, n)
+	})
+}
+
+func TestText(t *testing.T) {
+	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
+		n := Div(ds.Text("$foo"))
+		assert.Equal(t, `<div data-text="$foo"></div>`, n)
+	})
 }
 
 func TestOn(t *testing.T) {
