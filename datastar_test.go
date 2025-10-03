@@ -236,6 +236,18 @@ func TestOnSignalPatchFilter(t *testing.T) {
 	})
 }
 
+func TestPreserveAttr(t *testing.T) {
+	t.Run(`should output data-preserve-attr="open"`, func(t *testing.T) {
+		n := Details(ds.PreserveAttr("open"))
+		assert.Equal(t, `<details data-preserve-attr="open"></details>`, n)
+	})
+
+	t.Run(`should output data-preserve-attr="open class"`, func(t *testing.T) {
+		n := Details(ds.PreserveAttr("open", "class"))
+		assert.Equal(t, `<details data-preserve-attr="open class"></details>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))

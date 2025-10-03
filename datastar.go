@@ -4,6 +4,7 @@ package datastar
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	g "maragu.dev/gomponents"
@@ -319,6 +320,22 @@ func OnSignalPatch(expression string, modifiers ...Modifier) g.Node {
 // See https://data-star.dev/reference/attributes#data-on-signal-patch-filter
 func OnSignalPatchFilter(filter Filter) g.Node {
 	return data("on-signal-patch-filter", toFilter(filter))
+}
+
+// PreserveAttr preserves the value of an attribute when morphing DOM elements.
+//
+// <details open data-preserve-attr="open">
+//
+//	<summary>Title</summary>
+//	Content
+//
+// </details>
+//
+// You can preserve multiple attributes.
+//
+// See https://data-star.dev/reference/attributes#data-preserve-attr
+func PreserveAttr(attrs ...string) g.Node {
+	return data("preserve-attr", strings.Join(attrs, " "))
 }
 
 // Text binds the text content of an element to an expression.
