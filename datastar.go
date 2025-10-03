@@ -12,6 +12,11 @@ import (
 
 type Modifier string
 
+type Filter struct {
+	Include string
+	Exclude string
+}
+
 const (
 	ModifierCapture        Modifier = "__capture"
 	ModifierCase           Modifier = "__case"
@@ -258,6 +263,35 @@ func OnLoad(expression string, modifiers ...Modifier) g.Node {
 	return data("on-load"+eventWithModifiers, expression)
 }
 
+// OnSignalPatch runs an expression whenever one or more signals are patched.
+// This is useful for tracking changes, updating computed values, or triggering side effects when data updates.
+//
+// <div data-on-signal-patch="console.log('Signal patch:', patch)"></div>
+//
+// The patch variable is available in the expression and contains the signal patch details.
+//
+// <div data-on-signal-patch="console.log('Signal patch:', patch)"></div>
+//
+// You can filter which signals to watch using the data-on-signal-patch-filter attribute.
+//
+// See https://data-star.dev/reference/attributes#data-on-signal-patch
+func OnSignalPatch(expression string, modifiers ...Modifier) g.Node {
+	eventWithModifiers := ""
+	for _, modifier := range modifiers {
+		eventWithModifiers += string(modifier)
+	}
+	return data("on-signal-patch"+eventWithModifiers, expression)
+}
+
+// OnSignalPatchFilter filters which signals to watch when using the `data-on-signal-patch` attribute.
+//
+// <div data-on-signal-patch-filter="{include: /^counter$/}"></div>
+//
+// See https://data-star.dev/reference/attributes#data-on-signal-patch-filter
+func OnSignalPatchFilter(filter Filter) g.Node {
+	return data("on-signal-patch-filter", toFilter(filter))
+}
+
 // Text binds the text content of an element to an expression.
 //
 // <div data-text="$foo"></div>
@@ -274,6 +308,21 @@ func toObject(pairs []string) string {
 		if i < len(pairs)-2 {
 			v += ", "
 		}
+	}
+	v += "}"
+	return v
+}
+
+func toFilter(filter Filter) string {
+	v := "{"
+	if filter.Include != "" {
+		v += fmt.Sprintf("include: %s", filter.Include)
+		if filter.Exclude != "" {
+			v += ", "
+		}
+	}
+	if filter.Exclude != "" {
+		v += fmt.Sprintf("exclude: %s", filter.Exclude)
 	}
 	v += "}"
 	return v

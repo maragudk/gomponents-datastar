@@ -175,6 +175,35 @@ func TestOnLoad(t *testing.T) {
 	})
 }
 
+func TestOnSignalPatch(t *testing.T) {
+	t.Run(`should output data-on-signal-patch="console.log('Signal patch:', patch)"`, func(t *testing.T) {
+		n := Div(ds.OnSignalPatch("console.log('Signal patch:', patch)"))
+		assert.Equal(t, `<div data-on-signal-patch="console.log(&#39;Signal patch:&#39;, patch)"></div>`, n)
+	})
+
+	t.Run(`should output data-on-signal-patch__debounce.500ms="doSomething()"`, func(t *testing.T) {
+		n := Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond)))
+		assert.Equal(t, `<div data-on-signal-patch__debounce.500ms="doSomething()"></div>`, n)
+	})
+}
+
+func TestOnSignalPatchFilter(t *testing.T) {
+	t.Run(`should output data-on-signal-patch-filter="{include: /^counter$/}"`, func(t *testing.T) {
+		n := Div(ds.OnSignalPatchFilter(ds.Filter{Include: "/^counter$/"}))
+		assert.Equal(t, `<div data-on-signal-patch-filter="{include: /^counter$/}"></div>`, n)
+	})
+
+	t.Run(`should output data-on-signal-patch-filter="{exclude: /changes$/}"`, func(t *testing.T) {
+		n := Div(ds.OnSignalPatchFilter(ds.Filter{Exclude: "/changes$/"}))
+		assert.Equal(t, `<div data-on-signal-patch-filter="{exclude: /changes$/}"></div>`, n)
+	})
+
+	t.Run(`should output data-on-signal-patch-filter="{include: /user/, exclude: /password/}"`, func(t *testing.T) {
+		n := Div(ds.OnSignalPatchFilter(ds.Filter{Include: "/user/", Exclude: "/password/"}))
+		assert.Equal(t, `<div data-on-signal-patch-filter="{include: /user/, exclude: /password/}"></div>`, n)
+	})
+}
+
 func TestText(t *testing.T) {
 	t.Run(`should output data-text="$foo"`, func(t *testing.T) {
 		n := Div(ds.Text("$foo"))
