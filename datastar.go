@@ -40,14 +40,14 @@ const (
 )
 
 const (
-	ModifierCamel     Modifier = ".camel" // Camel case: myEvent
-	ModifierKebab     Modifier = ".kebab" // Kebab case: my-event
-	ModifierLeading   Modifier = ".leading"
-	ModifierNoLeading Modifier = ".noleading"
-	ModifierNoTrail   Modifier = ".notrail"
-	ModifierPascal    Modifier = ".pascal" // Pascal case: MyEvent
-	ModifierSnake     Modifier = ".snake"  // Snake case: my_event
-	ModifierTrail     Modifier = ".trail"
+	ModifierCamel      Modifier = ".camel" // Camel case: myEvent
+	ModifierKebab      Modifier = ".kebab" // Kebab case: my-event
+	ModifierLeading    Modifier = ".leading"
+	ModifierNoLeading  Modifier = ".noleading"
+	ModifierNoTrailing Modifier = ".notrailing"
+	ModifierPascal     Modifier = ".pascal" // Pascal case: MyEvent
+	ModifierSnake      Modifier = ".snake"  // Snake case: my_event
+	ModifierTrailing   Modifier = ".trailing"
 )
 
 // ModifierDuration outputs millisecond values for durations under 1 second, otherwise second values.
@@ -124,23 +124,27 @@ func Class(pairs ...string) g.Node {
 // Computed creates a signal that is computed based on an expression. The computed signal is read-only,
 // and its value is automatically updated when any signals in the expression are updated.
 //
-// <div data-computed-foo="$bar + $baz"></div>
+// <div data-computed="{foo: () => $bar + $baz}"></div>
+//
+// The `data-computed` attribute can also be used to create multiple computed signals using a set of key-value pairs,
+// where the keys represent signal names and the values represent expressions.
+//
+// <div data-computed="{foo: () => $bar + $baz, total: () => $price * $quantity}"></div>
 //
 // Computed signals are useful for memoizing expressions containing other signals. Their values can be used in other expressions.
 //
-// <div data-computed-foo="$bar + $baz"></div>
+// <div data-computed="{foo: () => $bar + $baz}"></div>
 // <div data-text="$foo"></div>
 //
 // Computed signal expressions must not be used for performing actions (changing other signals, actions, JavaScript functions, etc.).
 // If you need to perform an action in response to a signal change, use the data-effect attribute.
 //
 // See https://data-star.dev/reference/attributes#data-computed
-func Computed(name, expression string, modifiers ...Modifier) g.Node {
-	nameWithModifiers := name
-	for _, modifier := range modifiers {
-		nameWithModifiers += string(modifier)
+func Computed(pairs ...string) g.Node {
+	if len(pairs)%2 == 1 {
+		panic("each computed signal name must have an expression")
 	}
-	return data("computed-"+nameWithModifiers, expression)
+	return data("computed", toComputed(pairs))
 }
 
 // Effect executes an expression on page load and whenever any signals in the expression change.
@@ -193,9 +197,9 @@ func IgnoreMorph() g.Node {
 // <button data-on-click="@get('/endpoint')" data-indicator="fetching" data-attr-disabled="$fetching"></button>
 // <div data-show="$fetching">Loading...</div>
 //
-// When using data-indicator with a fetch request initiated in a data-on-load attribute, you should ensure that the indicator signal is created before the fetch request is initialized.
+// When using data-indicator with a fetch request initiated in a data-init attribute, you should ensure that the indicator signal is created before the fetch request is initialized.
 //
-// <div data-indicator-fetching data-on-load="@get('/endpoint')"></div>
+// <div data-indicator-fetching data-init="@get('/endpoint')"></div>
 //
 // See https://data-star.dev/reference/attributes#data-indicator
 func Indicator(name string, modifiers ...Modifier) g.Node {
@@ -279,20 +283,20 @@ func OnInterval(expression string, modifiers ...Modifier) g.Node {
 	return data("on-interval"+eventWithModifiers, expression)
 }
 
-// OnLoad runs an expression when an element is loaded into the DOM.
+// Init runs an expression when an element is loaded into the DOM.
 //
-// The expression contained in the data-on-load attribute is executed when the element attribute is loaded into the DOM.
+// The expression contained in the data-init attribute is executed when the element attribute is loaded into the DOM.
 // This can happen on page load, when an element is patched into the DOM, and any time the attribute is modified (via a backend action or otherwise).
 //
-// <div data-on-load="$count = 1"></div>
+// <div data-init="$count = 1"></div>
 //
-// See https://data-star.dev/reference/attributes#data-on-load
-func OnLoad(expression string, modifiers ...Modifier) g.Node {
+// See https://data-star.dev/reference/attributes#data-init
+func Init(expression string, modifiers ...Modifier) g.Node {
 	eventWithModifiers := ""
 	for _, modifier := range modifiers {
 		eventWithModifiers += string(modifier)
 	}
-	return data("on-load"+eventWithModifiers, expression)
+	return data("init"+eventWithModifiers, expression)
 }
 
 // OnSignalPatch runs an expression whenever one or more signals are patched.
@@ -441,6 +445,18 @@ func toObject(pairs []string) string {
 	v := "{"
 	for i := 0; i < len(pairs); i += 2 {
 		v += fmt.Sprintf(`%s: %s`, pairs[i], pairs[i+1])
+		if i < len(pairs)-2 {
+			v += ", "
+		}
+	}
+	v += "}"
+	return v
+}
+
+func toComputed(pairs []string) string {
+	v := "{"
+	for i := 0; i < len(pairs); i += 2 {
+		v += fmt.Sprintf(`%s: () => %s`, pairs[i], pairs[i+1])
 		if i < len(pairs)-2 {
 			v += ", "
 		}

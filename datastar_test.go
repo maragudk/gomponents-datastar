@@ -43,28 +43,15 @@ func TestClass(t *testing.T) {
 }
 
 func TestComputed(t *testing.T) {
-	t.Run(`should output data-computed-foo="$bar + $baz"`, func(t *testing.T) {
+	t.Run(`should output data-computed="{foo: () => $bar + $baz}"`, func(t *testing.T) {
 		n := Div(ds.Computed("foo", "$bar + $baz"))
-		assert.Equal(t, `<div data-computed-foo="$bar + $baz"></div>`, n)
+		assert.Equal(t, `<div data-computed="{foo: () =&gt; $bar + $baz}"></div>`, n)
 	})
 
-	tests := []struct {
-		name     string
-		modifier ds.Modifier
-		expected string
-	}{
-		{name: `should output data-computed-foo__case.camel="$bar + $baz"`, modifier: ds.ModifierCamel, expected: `<div data-computed-foo__case.camel="$bar + $baz"></div>`},
-		{name: `should output data-computed-foo__case.kebab="$bar + $baz"`, modifier: ds.ModifierKebab, expected: `<div data-computed-foo__case.kebab="$bar + $baz"></div>`},
-		{name: `should output data-computed-foo__case.snake="$bar + $baz"`, modifier: ds.ModifierSnake, expected: `<div data-computed-foo__case.snake="$bar + $baz"></div>`},
-		{name: `should output data-computed-foo__case.pascal="$bar + $baz"`, modifier: ds.ModifierPascal, expected: `<div data-computed-foo__case.pascal="$bar + $baz"></div>`},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			n := Div(ds.Computed("foo", "$bar + $baz", ds.ModifierCase, test.modifier))
-			assert.Equal(t, test.expected, n)
-		})
-	}
+	t.Run(`should output data-computed="{foo: () => $bar + $baz, total: () => $price * $quantity}"`, func(t *testing.T) {
+		n := Div(ds.Computed("foo", "$bar + $baz", "total", "$price * $quantity"))
+		assert.Equal(t, `<div data-computed="{foo: () =&gt; $bar + $baz, total: () =&gt; $price * $quantity}"></div>`, n)
+	})
 }
 
 func TestEffect(t *testing.T) {
@@ -196,15 +183,15 @@ func TestOnInterval(t *testing.T) {
 	})
 }
 
-func TestOnLoad(t *testing.T) {
-	t.Run(`should output data-on-load="$count = 1"`, func(t *testing.T) {
-		n := Div(ds.OnLoad("$count = 1"))
-		assert.Equal(t, `<div data-on-load="$count = 1"></div>`, n)
+func TestInit(t *testing.T) {
+	t.Run(`should output data-init="$count = 1"`, func(t *testing.T) {
+		n := Div(ds.Init("$count = 1"))
+		assert.Equal(t, `<div data-init="$count = 1"></div>`, n)
 	})
 
-	t.Run(`should output data-on-load__delay.500ms="$count = 1"`, func(t *testing.T) {
-		n := Div(ds.OnLoad("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond)))
-		assert.Equal(t, `<div data-on-load__delay.500ms="$count = 1"></div>`, n)
+	t.Run(`should output data-init__delay.500ms="$count = 1"`, func(t *testing.T) {
+		n := Div(ds.Init("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond)))
+		assert.Equal(t, `<div data-init__delay.500ms="$count = 1"></div>`, n)
 	})
 }
 
@@ -354,12 +341,12 @@ func ExampleClass_multiple() {
 
 func ExampleComputed() {
 	fmt.Print(Div(ds.Computed("foo", "$bar + $baz")))
-	// Output: <div data-computed-foo="$bar + $baz"></div>
+	// Output: <div data-computed="{foo: () =&gt; $bar + $baz}"></div>
 }
 
-func ExampleComputed_withModifierCase() {
-	fmt.Print(Div(ds.Computed("foo", "$bar + $baz", ds.ModifierCase, ds.ModifierKebab)))
-	// Output: <div data-computed-foo__case.kebab="$bar + $baz"></div>
+func ExampleComputed_multiple() {
+	fmt.Print(Div(ds.Computed("foo", "$bar + $baz", "total", "$price * $quantity")))
+	// Output: <div data-computed="{foo: () =&gt; $bar + $baz, total: () =&gt; $price * $quantity}"></div>
 }
 
 func ExampleEffect() {
@@ -437,14 +424,14 @@ func ExampleOnInterval_withDuration() {
 	// Output: <div data-on-interval.500ms="$count++"></div>
 }
 
-func ExampleOnLoad() {
-	fmt.Print(Div(ds.OnLoad("$count = 1")))
-	// Output: <div data-on-load="$count = 1"></div>
+func ExampleInit() {
+	fmt.Print(Div(ds.Init("$count = 1")))
+	// Output: <div data-init="$count = 1"></div>
 }
 
-func ExampleOnLoad_withDelay() {
-	fmt.Print(Div(ds.OnLoad("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond))))
-	// Output: <div data-on-load__delay.500ms="$count = 1"></div>
+func ExampleInit_withDelay() {
+	fmt.Print(Div(ds.Init("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond))))
+	// Output: <div data-init__delay.500ms="$count = 1"></div>
 }
 
 func ExampleOnSignalPatch() {
