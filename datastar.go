@@ -254,7 +254,7 @@ func On(event, expression string, modifiers ...Modifier) g.Node {
 	for _, modifier := range modifiers {
 		eventWithModifiers += string(modifier)
 	}
-	return data("on-"+eventWithModifiers, expression)
+	return data("on:"+eventWithModifiers, expression)
 }
 
 // OnIntersect runs an expression when the element intersects with the viewport.

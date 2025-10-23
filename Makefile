@@ -6,6 +6,10 @@ benchmark:
 cover:
 	go tool cover -html cover.out
 
+.PHONY: demo
+demo:
+	cd demo && go run .
+
 .PHONY: fmt
 fmt:
 	goimports -w -local `head -n 1 go.mod | sed 's/^module //'` .
