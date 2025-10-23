@@ -71,7 +71,7 @@ func buildPage() g.Node {
 			Script(Type("module"), Src("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js")),
 			StyleEl(Type("text/css"), g.Raw(`
 				body {
-					font-family: 'Comic Sans MS', 'Comic Neue', cursive, system-ui, -apple-system, sans-serif;
+					font-family: 'Comic Sans MS', 'Comic Neue', system-ui, -apple-system, sans-serif;
 					max-width: 1200px;
 					margin: 0 auto;
 					padding: 20px;
