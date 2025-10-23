@@ -1,6 +1,6 @@
 module demo
 
-go 1.25.3
+go 1.25
 
 require (
 	maragu.dev/gomponents v1.2.0
