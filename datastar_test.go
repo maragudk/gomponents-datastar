@@ -138,14 +138,14 @@ func TestIndicator(t *testing.T) {
 }
 
 func TestOn(t *testing.T) {
-	t.Run(`should output data-on-click="$foo = ''"`, func(t *testing.T) {
+	t.Run(`should output data-on:click="$foo = ''"`, func(t *testing.T) {
 		n := Button(ds.On("click", "$foo = ''"))
-		assert.Equal(t, `<button data-on-click="$foo = &#39;&#39;"></button>`, n)
+		assert.Equal(t, `<button data-on:click="$foo = &#39;&#39;"></button>`, n)
 	})
 
-	t.Run(`should output data-on-click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
+	t.Run(`should output data-on:click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
 		n := Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading))
-		assert.Equal(t, `<button data-on-click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
+		assert.Equal(t, `<button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
 	})
 }
 
@@ -396,12 +396,12 @@ func ExampleJSONSignals_withModifier() {
 
 func ExampleOn_click() {
 	fmt.Print(Button(ds.On("click", "$foo = ''")))
-	// Output: <button data-on-click="$foo = &#39;&#39;"></button>
+	// Output: <button data-on:click="$foo = &#39;&#39;"></button>
 }
 
 func ExampleOn_withModifiers() {
 	fmt.Print(Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading)))
-	// Output: <button data-on-click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
+	// Output: <button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
 }
 
 func ExampleOnIntersect() {
