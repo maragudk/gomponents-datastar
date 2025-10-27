@@ -10,8 +10,9 @@ import (
 	"time"
 
 	g "maragu.dev/gomponents"
-	ds "maragu.dev/gomponents-datastar"
 	. "maragu.dev/gomponents/html"
+
+	ds "maragu.dev/gomponents-datastar"
 )
 
 func main() {

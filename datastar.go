@@ -51,8 +51,15 @@ const (
 	ModifierTrailing   Modifier = ".trailing"
 )
 
-// Duration outputs millisecond values for durations.
+// Duration outputs millisecond values for durations, clamped to a minimum of 1ms.
+// Panics if the duration is not positive.
 func Duration(d time.Duration) Modifier {
+	if d <= 0 {
+		panic(fmt.Sprintf("duration must be positive, but is: %v", d))
+	}
+	if d < time.Millisecond {
+		d = time.Millisecond
+	}
 	return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
 }
 
