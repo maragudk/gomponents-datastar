@@ -412,7 +412,7 @@ func buildPage() g.Node {
 						H3(g.Text("Debounced Input")),
 						Input(
 							Type("text"),
-							ds.On("input", "$inputValue = evt.target.value", ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond)),
+							ds.On("input", "$inputValue = evt.target.value", ds.ModifierDebounce, ds.Duration(500*time.Millisecond)),
 							Placeholder("Type here (debounced 500ms)"),
 						),
 						P(g.Text("Debounced value: "), Span(ds.Text("$inputValue"))),
@@ -425,7 +425,7 @@ func buildPage() g.Node {
 				H2(g.Text("Intervals")),
 				P(g.Text("The data-on-interval attribute runs expressions at regular intervals.")),
 				Div(Class("demo-box"),
-					ds.OnInterval("$count++", ds.ModifierDuration(1*time.Second)),
+					ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(1*time.Second)),
 					P(g.Text("Seconds elapsed: "), Span(ds.Text("$count"))),
 				),
 			),

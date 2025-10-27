@@ -24,6 +24,7 @@ const (
 	ModifierCase           Modifier = "__case"
 	ModifierDebounce       Modifier = "__debounce"
 	ModifierDelay          Modifier = "__delay"
+	ModifierDuration       Modifier = "__duration"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
 	ModifierIfMissing      Modifier = "__ifmissing"
@@ -50,12 +51,9 @@ const (
 	ModifierTrailing   Modifier = ".trailing"
 )
 
-// ModifierDuration outputs millisecond values for durations under 1 second, otherwise second values.
-func ModifierDuration(d time.Duration) Modifier {
-	if d.Seconds() < 1 {
-		return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
-	}
-	return Modifier(fmt.Sprintf(".%vs", int(d.Seconds())))
+// Duration outputs millisecond values for durations.
+func Duration(d time.Duration) Modifier {
+	return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
 }
 
 // Attr sets the value of any HTML attribute to an expression, and keeps it in sync.

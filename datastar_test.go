@@ -144,7 +144,7 @@ func TestOn(t *testing.T) {
 	})
 
 	t.Run(`should output data-on:click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
-		n := Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading))
+		n := Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.Duration(500*time.Millisecond), ds.ModifierLeading))
 		assert.Equal(t, `<button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
 	})
 }
@@ -172,14 +172,9 @@ func TestOnInterval(t *testing.T) {
 		assert.Equal(t, `<div data-on-interval="$count++"></div>`, n)
 	})
 
-	t.Run(`should output data-on-interval.500ms="$count++"`, func(t *testing.T) {
-		n := Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond)))
-		assert.Equal(t, `<div data-on-interval.500ms="$count++"></div>`, n)
-	})
-
-	t.Run(`should output data-on-interval.2s="$count++"`, func(t *testing.T) {
-		n := Div(ds.OnInterval("$count++", ds.ModifierDuration(2*time.Second)))
-		assert.Equal(t, `<div data-on-interval.2s="$count++"></div>`, n)
+	t.Run(`should output data-on-interval__duration.500ms="$count++"`, func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(500*time.Millisecond)))
+		assert.Equal(t, `<div data-on-interval__duration.500ms="$count++"></div>`, n)
 	})
 }
 
@@ -190,7 +185,7 @@ func TestInit(t *testing.T) {
 	})
 
 	t.Run(`should output data-init__delay.500ms="$count = 1"`, func(t *testing.T) {
-		n := Div(ds.Init("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond)))
+		n := Div(ds.Init("$count = 1", ds.ModifierDelay, ds.Duration(500*time.Millisecond)))
 		assert.Equal(t, `<div data-init__delay.500ms="$count = 1"></div>`, n)
 	})
 }
@@ -202,7 +197,7 @@ func TestOnSignalPatch(t *testing.T) {
 	})
 
 	t.Run(`should output data-on-signal-patch__debounce.500ms="doSomething()"`, func(t *testing.T) {
-		n := Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond)))
+		n := Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.Duration(500*time.Millisecond)))
 		assert.Equal(t, `<div data-on-signal-patch__debounce.500ms="doSomething()"></div>`, n)
 	})
 }
@@ -400,7 +395,7 @@ func ExampleOn_click() {
 }
 
 func ExampleOn_withModifiers() {
-	fmt.Print(Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond), ds.ModifierLeading)))
+	fmt.Print(Button(ds.On("click", "$foo = ''", ds.ModifierWindow, ds.ModifierDebounce, ds.Duration(500*time.Millisecond), ds.ModifierLeading)))
 	// Output: <button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
 }
 
@@ -420,8 +415,8 @@ func ExampleOnInterval() {
 }
 
 func ExampleOnInterval_withDuration() {
-	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond))))
-	// Output: <div data-on-interval.500ms="$count++"></div>
+	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(500*time.Millisecond))))
+	// Output: <div data-on-interval__duration.500ms="$count++"></div>
 }
 
 func ExampleInit() {
@@ -430,7 +425,7 @@ func ExampleInit() {
 }
 
 func ExampleInit_withDelay() {
-	fmt.Print(Div(ds.Init("$count = 1", ds.ModifierDelay, ds.ModifierDuration(500*time.Millisecond))))
+	fmt.Print(Div(ds.Init("$count = 1", ds.ModifierDelay, ds.Duration(500*time.Millisecond))))
 	// Output: <div data-init__delay.500ms="$count = 1"></div>
 }
 
@@ -440,7 +435,7 @@ func ExampleOnSignalPatch() {
 }
 
 func ExampleOnSignalPatch_withModifiers() {
-	fmt.Print(Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.ModifierDuration(500*time.Millisecond))))
+	fmt.Print(Div(ds.OnSignalPatch("doSomething()", ds.ModifierDebounce, ds.Duration(500*time.Millisecond))))
 	// Output: <div data-on-signal-patch__debounce.500ms="doSomething()"></div>
 }
 
@@ -502,14 +497,4 @@ func ExampleStyle_multiple() {
 func ExampleText() {
 	fmt.Print(Div(ds.Text("$foo")))
 	// Output: <div data-text="$foo"></div>
-}
-
-func ExampleModifierDuration_milliseconds() {
-	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(500*time.Millisecond))))
-	// Output: <div data-on-interval.500ms="$count++"></div>
-}
-
-func ExampleModifierDuration_seconds() {
-	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration(2*time.Second))))
-	// Output: <div data-on-interval.2s="$count++"></div>
 }
