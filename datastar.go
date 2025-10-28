@@ -51,16 +51,13 @@ const (
 	ModifierTrailing   Modifier = ".trailing"
 )
 
-// Duration outputs millisecond values for durations, clamped to a minimum of 1ms.
-// Panics if the duration is not positive.
+// Duration outputs millisecond values for durations, rounded to the nearest millisecond.
+// Panics if the duration is negative.
 func Duration(d time.Duration) Modifier {
-	if d <= 0 {
-		panic(fmt.Sprintf("duration must be positive, but is: %v", d))
+	if d < 0 {
+		panic(fmt.Sprintf("duration must not be negative, but is: %v", d))
 	}
-	if d < time.Millisecond {
-		d = time.Millisecond
-	}
-	return Modifier(fmt.Sprintf(".%vms", d.Milliseconds()))
+	return Modifier(fmt.Sprintf(".%vms", d.Round(time.Millisecond).Milliseconds()))
 }
 
 // Attr sets the value of any HTML attribute to an expression, and keeps it in sync.
