@@ -509,27 +509,28 @@ func TestDuration(t *testing.T) {
 		ds.Duration(-1)
 	})
 
-	t.Run("should panic on zero duration", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("expected panic for negative duration")
-			}
-		}()
-		ds.Duration(0)
+	t.Run("should round zero duration to 0ms", func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(0)))
+		assert.Equal(t, `<div data-on-interval__duration.0ms="$count++"></div>`, n)
 	})
 
-	t.Run("should clamp small duration to 1ms", func(t *testing.T) {
-		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(1)))
+	t.Run("should round small duration down to 0ms", func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(100*time.Microsecond)))
+		assert.Equal(t, `<div data-on-interval__duration.0ms="$count++"></div>`, n)
+	})
+
+	t.Run("should round 500us up to 1ms", func(t *testing.T) {
+		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(500*time.Microsecond)))
 		assert.Equal(t, `<div data-on-interval__duration.1ms="$count++"></div>`, n)
 	})
 
-	t.Run("should not clamp positive duration", func(t *testing.T) {
+	t.Run("should not round 1ms", func(t *testing.T) {
 		n := Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(time.Millisecond)))
 		assert.Equal(t, `<div data-on-interval__duration.1ms="$count++"></div>`, n)
 	})
 }
 
-func ExampleDuration_clamping() {
-	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(100*time.Microsecond))))
+func ExampleDuration_rounding() {
+	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(500*time.Microsecond))))
 	// Output: <div data-on-interval__duration.1ms="$count++"></div>
 }
