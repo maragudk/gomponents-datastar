@@ -25,6 +25,7 @@ const (
 	ModifierDebounce       Modifier = "__debounce"
 	ModifierDelay          Modifier = "__delay"
 	ModifierDuration       Modifier = "__duration"
+	ModifierExit           Modifier = "__exit"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
 	ModifierIfMissing      Modifier = "__ifmissing"
@@ -35,6 +36,7 @@ const (
 	ModifierSelf           Modifier = "__self"
 	ModifierStop           Modifier = "__stop"
 	ModifierTerse          Modifier = "__terse"
+	ModifierThreshold      Modifier = "__threshold"
 	ModifierThrottle       Modifier = "__throttle"
 	ModifierViewTransition Modifier = "__viewtransition"
 	ModifierWindow         Modifier = "__window"
@@ -58,6 +60,23 @@ func Duration(d time.Duration) Modifier {
 		panic(fmt.Sprintf("duration must not be negative, but is: %v", d))
 	}
 	return Modifier(fmt.Sprintf(".%vms", d.Round(time.Millisecond).Milliseconds()))
+}
+
+// Threshold outputs a visibility percentage threshold for the __threshold modifier.
+// The value must be between 0.0 (exclusive) and 1.0 (inclusive).
+// For values less than 1.0, the value is rounded to two decimal places (e.g., 0.25 for 25% visibility).
+// For the value 1.0, it is formatted as ".100" representing 100% visibility.
+// Panics if the threshold is outside the valid range.
+func Threshold(threshold float64) Modifier {
+	if threshold <= 0 || threshold > 1 {
+		panic(fmt.Sprintf("threshold must be between 0.0 (exclusive) and 1.0 (inclusive), but is: %v", threshold))
+	}
+	// Special case: 1 represents 100% visibility
+	if threshold == 1 {
+		return Modifier(".100")
+	}
+	// Round to 2 decimal places and remove leading "0"
+	return Modifier(strings.TrimPrefix(fmt.Sprintf("%.2f", threshold), "0"))
 }
 
 // Attr sets the value of any HTML attribute to an expression, and keeps it in sync.
