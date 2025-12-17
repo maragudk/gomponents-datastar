@@ -25,4 +25,4 @@ make test
 
 ## Datastar Compatibility
 
-This library is compatible with Datastar v1.0.0-RC.6 and above.
+This library is compatible with Datastar v1.0.0-RC.7 and above.
