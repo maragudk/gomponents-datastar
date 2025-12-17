@@ -164,6 +164,16 @@ func TestOnIntersect(t *testing.T) {
 		n := Div(ds.OnIntersect("$halfIntersected = true", ds.ModifierHalf))
 		assert.Equal(t, `<div data-on-intersect__half="$halfIntersected = true"></div>`, n)
 	})
+
+	t.Run(`should output data-on-intersect__exit="$exited = true"`, func(t *testing.T) {
+		n := Div(ds.OnIntersect("$exited = true", ds.ModifierExit))
+		assert.Equal(t, `<div data-on-intersect__exit="$exited = true"></div>`, n)
+	})
+
+	t.Run(`should output data-on-intersect__threshold.25="$visible = true"`, func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.25)))
+		assert.Equal(t, `<div data-on-intersect__threshold.25="$visible = true"></div>`, n)
+	})
 }
 
 func TestOnInterval(t *testing.T) {
@@ -533,4 +543,68 @@ func TestDuration(t *testing.T) {
 func ExampleDuration_rounding() {
 	fmt.Print(Div(ds.OnInterval("$count++", ds.ModifierDuration, ds.Duration(500*time.Microsecond))))
 	// Output: <div data-on-interval__duration.1ms="$count++"></div>
+}
+
+func TestThreshold(t *testing.T) {
+	t.Run("should panic on negative threshold", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for negative threshold")
+			}
+		}()
+		ds.Threshold(-0.1)
+	})
+
+	t.Run("should panic on threshold equal to 0", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for threshold equal to 0")
+			}
+		}()
+		ds.Threshold(0)
+	})
+
+	t.Run("should panic on threshold greater than 1", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for threshold greater than 1")
+			}
+		}()
+		ds.Threshold(1.1)
+	})
+
+	t.Run("should format 0.25 as .25", func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.25)))
+		assert.Equal(t, `<div data-on-intersect__threshold.25="$visible = true"></div>`, n)
+	})
+
+	t.Run("should format 0.5 as .50", func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.5)))
+		assert.Equal(t, `<div data-on-intersect__threshold.50="$visible = true"></div>`, n)
+	})
+
+	t.Run("should format 1 as 100", func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(1)))
+		assert.Equal(t, `<div data-on-intersect__threshold.100="$visible = true"></div>`, n)
+	})
+
+	t.Run("should round 0.333 to .33", func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.333)))
+		assert.Equal(t, `<div data-on-intersect__threshold.33="$visible = true"></div>`, n)
+	})
+
+	t.Run("should round 0.335 to .34", func(t *testing.T) {
+		n := Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.335)))
+		assert.Equal(t, `<div data-on-intersect__threshold.34="$visible = true"></div>`, n)
+	})
+}
+
+func ExampleOnIntersect_withExit() {
+	fmt.Print(Div(ds.OnIntersect("$exited = true", ds.ModifierExit)))
+	// Output: <div data-on-intersect__exit="$exited = true"></div>
+}
+
+func ExampleOnIntersect_withThreshold() {
+	fmt.Print(Div(ds.OnIntersect("$visible = true", ds.ModifierThreshold, ds.Threshold(0.25))))
+	// Output: <div data-on-intersect__threshold.25="$visible = true"></div>
 }
