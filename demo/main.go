@@ -28,7 +28,12 @@ func main() {
 		return
 	}
 
-	// Server mode
+	// Server mode – resolve docs dir relative to the working directory.
+	docsDir := "docs"
+	if _, err := os.Stat(docsDir); os.IsNotExist(err) {
+		docsDir = filepath.Join("..", "docs")
+	}
+	http.Handle("/datastar.js", http.FileServer(http.Dir(docsDir)))
 	http.HandleFunc("/", handleIndex)
 
 	const addr = ":8080"
@@ -69,7 +74,7 @@ func buildPage() Node {
 			Meta(Charset("utf-8")),
 			Meta(Name("viewport"), Content("width=device-width, initial-scale=1")),
 			TitleEl(Text("Datastar Attributes Demo")),
-			Script(Type("module"), Src("https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js")),
+			Script(Type("module"), Src("/datastar.js")),
 			StyleEl(Type("text/css"), Raw(`
 				body {
 					font-family: 'Comic Sans MS', 'Comic Neue', system-ui, -apple-system, sans-serif;
