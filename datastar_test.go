@@ -28,6 +28,21 @@ func TestBind(t *testing.T) {
 		n := Input(data.Bind("foo"))
 		assert.Equal(t, `<input data-bind="foo">`, n)
 	})
+
+	t.Run(`should output data-bind__prop.checked="isChecked"`, func(t *testing.T) {
+		n := Input(data.Bind("isChecked", data.ModifierProp, data.Prop("checked")))
+		assert.Equal(t, `<input data-bind__prop.checked="isChecked">`, n)
+	})
+
+	t.Run(`should output data-bind__event.input.change="query"`, func(t *testing.T) {
+		n := Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change")))
+		assert.Equal(t, `<input data-bind__event.input.change="query">`, n)
+	})
+
+	t.Run(`should output data-bind__event.change="selected"`, func(t *testing.T) {
+		n := Input(data.Bind("selected", data.ModifierEvent, data.Event("change")))
+		assert.Equal(t, `<input data-bind__event.change="selected">`, n)
+	})
 }
 
 func TestClass(t *testing.T) {
@@ -146,6 +161,11 @@ func TestOn(t *testing.T) {
 	t.Run(`should output data-on:click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
 		n := Button(data.On("click", "$foo = ''", data.ModifierWindow, data.ModifierDebounce, data.Duration(500*time.Millisecond), data.ModifierLeading))
 		assert.Equal(t, `<button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
+	})
+
+	t.Run(`should output data-on:keydown__document="$foo = ''"`, func(t *testing.T) {
+		n := Div(data.On("keydown", "$foo = ''", data.ModifierDocument))
+		assert.Equal(t, `<div data-on:keydown__document="$foo = &#39;&#39;"></div>`, n)
 	})
 }
 
@@ -334,6 +354,16 @@ func ExampleBind() {
 	// Output: <input data-bind="foo">
 }
 
+func ExampleBind_withProp() {
+	fmt.Print(Input(data.Bind("isChecked", data.ModifierProp, data.Prop("checked"))))
+	// Output: <input data-bind__prop.checked="isChecked">
+}
+
+func ExampleBind_withEvent() {
+	fmt.Print(Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change"))))
+	// Output: <input data-bind__event.input.change="query">
+}
+
 func ExampleClass() {
 	fmt.Print(Div(data.Class("hidden", "$hidden")))
 	// Output: <div data-class="{hidden: $hidden}"></div>
@@ -407,6 +437,11 @@ func ExampleOn_click() {
 func ExampleOn_withModifiers() {
 	fmt.Print(Button(data.On("click", "$foo = ''", data.ModifierWindow, data.ModifierDebounce, data.Duration(500*time.Millisecond), data.ModifierLeading)))
 	// Output: <button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
+}
+
+func ExampleOn_withDocument() {
+	fmt.Print(Div(data.On("keydown", "$foo = ''", data.ModifierDocument)))
+	// Output: <div data-on:keydown__document="$foo = &#39;&#39;"></div>
 }
 
 func ExampleOnIntersect() {
