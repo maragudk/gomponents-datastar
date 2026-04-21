@@ -26,7 +26,6 @@ const (
 	ModifierDelay          Modifier = "__delay"
 	ModifierDocument       Modifier = "__document"
 	ModifierDuration       Modifier = "__duration"
-	ModifierEvent          Modifier = "__event"
 	ModifierExit           Modifier = "__exit"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
@@ -35,7 +34,6 @@ const (
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
 	ModifierPrevent        Modifier = "__prevent"
-	ModifierProp           Modifier = "__prop"
 	ModifierSelf           Modifier = "__self"
 	ModifierStop           Modifier = "__stop"
 	ModifierTerse          Modifier = "__terse"
@@ -65,23 +63,34 @@ func Duration(d time.Duration) Modifier {
 	return Modifier(fmt.Sprintf(".%vms", d.Round(time.Millisecond).Milliseconds()))
 }
 
-// Prop outputs a property name for the __prop modifier.
+// Prop outputs the __prop modifier for a data-bind attribute, binding through the given property name.
+// The property name is converted to camel case by Datastar at runtime.
+// Panics if name is empty.
 //
-// data.Bind("isChecked", data.ModifierProp, data.Prop("checked")) outputs data-bind__prop.checked="isChecked".
+// data.Bind("isChecked", data.Prop("checked")) outputs data-bind__prop.checked="isChecked".
 func Prop(name string) Modifier {
-	return Modifier("." + name)
+	if name == "" {
+		panic("prop name must not be empty")
+	}
+	return Modifier("__prop." + name)
 }
 
-// Event outputs one or more event names for the __event modifier.
+// Event outputs the __event modifier for a data-bind attribute, defining which events sync the element back to the signal.
+// Panics if no names are given, or any name is empty.
 //
-// data.Bind("query", data.ModifierEvent, data.Event("input", "change")) outputs data-bind__event.input.change="query".
+// data.Bind("query", data.Event("input", "change")) outputs data-bind__event.input.change="query".
 func Event(names ...string) Modifier {
-	var b strings.Builder
-	for _, n := range names {
-		b.WriteString(".")
-		b.WriteString(n)
+	if len(names) == 0 {
+		panic("at least one event name must be provided")
 	}
-	return Modifier(b.String())
+	s := "__event"
+	for _, n := range names {
+		if n == "" {
+			panic("event name must not be empty")
+		}
+		s += "." + n
+	}
+	return Modifier(s)
 }
 
 // Threshold outputs a visibility percentage threshold for the __threshold modifier.
@@ -142,11 +151,13 @@ func Attr(pairs ...string) g.Node {
 //
 // Use the __prop modifier to bind through a specific property instead of the inferred native or default binding.
 //
-// <my-toggle data-bind-is-checked__prop.checked></my-toggle>
+// <my-toggle data-bind__prop.checked="isChecked"></my-toggle>
 //
 // Use the __event modifier to define which events sync the element back to the signal.
 //
-// <input data-bind-query__event.input.change />
+// <input data-bind__event.input.change="query" />
+//
+// The __prop and __event modifiers may be used independently or together.
 //
 // See https://data-star.dev/reference/attributes#data-bind
 func Bind(name string, modifiers ...Modifier) g.Node {

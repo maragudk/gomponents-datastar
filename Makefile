@@ -1,6 +1,6 @@
 .PHONY: deps
 deps:
-	curl -Lf -o docs/datastar.js https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0/bundles/datastar.js
+	curl -Lf -o docs/datastar.js https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.1/bundles/datastar.js
 
 .PHONY: benchmark
 benchmark:

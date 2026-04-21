@@ -30,18 +30,54 @@ func TestBind(t *testing.T) {
 	})
 
 	t.Run(`should output data-bind__prop.checked="isChecked"`, func(t *testing.T) {
-		n := Input(data.Bind("isChecked", data.ModifierProp, data.Prop("checked")))
+		n := Input(data.Bind("isChecked", data.Prop("checked")))
 		assert.Equal(t, `<input data-bind__prop.checked="isChecked">`, n)
 	})
 
 	t.Run(`should output data-bind__event.input.change="query"`, func(t *testing.T) {
-		n := Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change")))
+		n := Input(data.Bind("query", data.Event("input", "change")))
 		assert.Equal(t, `<input data-bind__event.input.change="query">`, n)
 	})
 
 	t.Run(`should output data-bind__event.change="selected"`, func(t *testing.T) {
-		n := Input(data.Bind("selected", data.ModifierEvent, data.Event("change")))
+		n := Input(data.Bind("selected", data.Event("change")))
 		assert.Equal(t, `<input data-bind__event.change="selected">`, n)
+	})
+
+	t.Run(`should output data-bind__prop.checked__event.change="isChecked"`, func(t *testing.T) {
+		n := Input(data.Bind("isChecked", data.Prop("checked"), data.Event("change")))
+		assert.Equal(t, `<input data-bind__prop.checked__event.change="isChecked">`, n)
+	})
+}
+
+func TestProp(t *testing.T) {
+	t.Run("should panic on empty name", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for empty prop name")
+			}
+		}()
+		data.Prop("")
+	})
+}
+
+func TestEvent(t *testing.T) {
+	t.Run("should panic when no names are given", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for zero event names")
+			}
+		}()
+		data.Event()
+	})
+
+	t.Run("should panic on empty name", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for empty event name")
+			}
+		}()
+		data.Event("change", "")
 	})
 }
 
@@ -355,13 +391,18 @@ func ExampleBind() {
 }
 
 func ExampleBind_withProp() {
-	fmt.Print(Input(data.Bind("isChecked", data.ModifierProp, data.Prop("checked"))))
+	fmt.Print(Input(data.Bind("isChecked", data.Prop("checked"))))
 	// Output: <input data-bind__prop.checked="isChecked">
 }
 
 func ExampleBind_withEvent() {
-	fmt.Print(Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change"))))
+	fmt.Print(Input(data.Bind("query", data.Event("input", "change"))))
 	// Output: <input data-bind__event.input.change="query">
+}
+
+func ExampleBind_withPropAndEvent() {
+	fmt.Print(Input(data.Bind("isChecked", data.Prop("checked"), data.Event("change"))))
+	// Output: <input data-bind__prop.checked__event.change="isChecked">
 }
 
 func ExampleClass() {
