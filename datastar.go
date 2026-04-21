@@ -24,6 +24,7 @@ const (
 	ModifierCase           Modifier = "__case"
 	ModifierDebounce       Modifier = "__debounce"
 	ModifierDelay          Modifier = "__delay"
+	ModifierDocument       Modifier = "__document"
 	ModifierDuration       Modifier = "__duration"
 	ModifierExit           Modifier = "__exit"
 	ModifierFull           Modifier = "__full"
@@ -60,6 +61,36 @@ func Duration(d time.Duration) Modifier {
 		panic(fmt.Sprintf("duration must not be negative, but is: %v", d))
 	}
 	return Modifier(fmt.Sprintf(".%vms", d.Round(time.Millisecond).Milliseconds()))
+}
+
+// Prop outputs the __prop modifier for a data-bind attribute, binding through the given property name.
+// The property name is converted to camel case by Datastar at runtime.
+// Panics if name is empty.
+//
+// data.Bind("isChecked", data.Prop("checked")) outputs data-bind__prop.checked="isChecked".
+func Prop(name string) Modifier {
+	if name == "" {
+		panic("prop name must not be empty")
+	}
+	return Modifier("__prop." + name)
+}
+
+// Event outputs the __event modifier for a data-bind attribute, defining which events sync the element back to the signal.
+// Panics if no names are given, or any name is empty.
+//
+// data.Bind("query", data.Event("input", "change")) outputs data-bind__event.input.change="query".
+func Event(names ...string) Modifier {
+	if len(names) == 0 {
+		panic("at least one event name must be provided")
+	}
+	s := "__event"
+	for _, n := range names {
+		if n == "" {
+			panic("event name must not be empty")
+		}
+		s += "." + n
+	}
+	return Modifier(s)
 }
 
 // Threshold outputs a visibility percentage threshold for the __threshold modifier.
@@ -118,9 +149,23 @@ func Attr(pairs ...string) g.Node {
 // <input data-bind-foo value="bar" />
 // </div>
 //
+// Use the __prop modifier to bind through a specific property instead of the inferred native or default binding.
+//
+// <my-toggle data-bind__prop.checked="isChecked"></my-toggle>
+//
+// Use the __event modifier to define which events sync the element back to the signal.
+//
+// <input data-bind__event.input.change="query" />
+//
+// The __prop and __event modifiers may be used independently or together.
+//
 // See https://data-star.dev/reference/attributes#data-bind
-func Bind(name string) g.Node {
-	return data("bind", name)
+func Bind(name string, modifiers ...Modifier) g.Node {
+	nameWithModifiers := ""
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("bind"+nameWithModifiers, name)
 }
 
 // Class adds or removes a class to or from an element based on an expression.
