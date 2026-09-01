@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
 	data "maragu.dev/gomponents-datastar"
@@ -27,6 +28,49 @@ func TestBind(t *testing.T) {
 	t.Run(`should output data-bind="foo"`, func(t *testing.T) {
 		n := Input(data.Bind("foo"))
 		assert.Equal(t, `<input data-bind="foo">`, n)
+	})
+
+	t.Run(`should output data-bind:is-checked__prop.checked`, func(t *testing.T) {
+		n := Input(data.Bind("is-checked", data.Prop("checked")))
+		assert.Equal(t, `<input data-bind:is-checked__prop.checked>`, n)
+	})
+
+	t.Run(`should output data-bind:query__event.input.change`, func(t *testing.T) {
+		n := Input(data.Bind("query", data.Event("input", "change")))
+		assert.Equal(t, `<input data-bind:query__event.input.change>`, n)
+	})
+
+	t.Run(`should output data-bind:foo__prop.checked__event.change when combining Prop and Event`, func(t *testing.T) {
+		n := Input(data.Bind("foo", data.Prop("checked"), data.Event("change")))
+		assert.Equal(t, `<input data-bind:foo__prop.checked__event.change>`, n)
+	})
+
+	t.Run(`should output data-bind:is-checked__prop.checked__event.change`, func(t *testing.T) {
+		n := El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change")))
+		assert.Equal(t, `<my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>`, n)
+	})
+
+	tests := []struct {
+		name     string
+		modifier data.Modifier
+		expected string
+	}{
+		{name: `should output data-bind:my-signal__case.camel`, modifier: data.ModifierCamel, expected: `<input data-bind:my-signal__case.camel>`},
+		{name: `should output data-bind:my-signal__case.kebab`, modifier: data.ModifierKebab, expected: `<input data-bind:my-signal__case.kebab>`},
+		{name: `should output data-bind:my-signal__case.snake`, modifier: data.ModifierSnake, expected: `<input data-bind:my-signal__case.snake>`},
+		{name: `should output data-bind:my-signal__case.pascal`, modifier: data.ModifierPascal, expected: `<input data-bind:my-signal__case.pascal>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n := Input(data.Bind("my-signal", data.ModifierCase, test.modifier))
+			assert.Equal(t, test.expected, n)
+		})
+	}
+
+	t.Run("should escape the name in the value form", func(t *testing.T) {
+		n := Input(data.Bind(`foo" onclick="alert(1)`))
+		assert.Equal(t, `<input data-bind="foo&#34; onclick=&#34;alert(1)">`, n)
 	})
 }
 
@@ -123,18 +167,39 @@ func TestIndicator(t *testing.T) {
 		modifier data.Modifier
 		expected string
 	}{
-		{name: `should output data-indicator__case.camel="fetching"`, modifier: data.ModifierCamel, expected: `<button data-indicator__case.camel="fetching"></button>`},
-		{name: `should output data-indicator__case.kebab="fetching"`, modifier: data.ModifierKebab, expected: `<button data-indicator__case.kebab="fetching"></button>`},
-		{name: `should output data-indicator__case.snake="fetching"`, modifier: data.ModifierSnake, expected: `<button data-indicator__case.snake="fetching"></button>`},
-		{name: `should output data-indicator__case.pascal="fetching"`, modifier: data.ModifierPascal, expected: `<button data-indicator__case.pascal="fetching"></button>`},
+		{name: `should output data-indicator:my-signal__case.camel`, modifier: data.ModifierCamel, expected: `<button data-indicator:my-signal__case.camel></button>`},
+		{name: `should output data-indicator:my-signal__case.kebab`, modifier: data.ModifierKebab, expected: `<button data-indicator:my-signal__case.kebab></button>`},
+		{name: `should output data-indicator:my-signal__case.snake`, modifier: data.ModifierSnake, expected: `<button data-indicator:my-signal__case.snake></button>`},
+		{name: `should output data-indicator:my-signal__case.pascal`, modifier: data.ModifierPascal, expected: `<button data-indicator:my-signal__case.pascal></button>`},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			n := Button(data.Indicator("fetching", data.ModifierCase, test.modifier))
+			n := Button(data.Indicator("my-signal", data.ModifierCase, test.modifier))
 			assert.Equal(t, test.expected, n)
 		})
 	}
+}
+
+func TestNonce(t *testing.T) {
+	t.Run(`should output data-nonce="abc123"`, func(t *testing.T) {
+		n := HTML(data.Nonce("abc123"))
+		assert.Equal(t, `<html data-nonce="abc123"></html>`, n)
+	})
+
+	t.Run("should escape the value", func(t *testing.T) {
+		n := HTML(data.Nonce(`abc"123`))
+		assert.Equal(t, `<html data-nonce="abc&#34;123"></html>`, n)
+	})
+
+	t.Run("should panic on an empty value", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for empty value")
+			}
+		}()
+		data.Nonce("")
+	})
 }
 
 func TestOn(t *testing.T) {
@@ -146,6 +211,11 @@ func TestOn(t *testing.T) {
 	t.Run(`should output data-on:click__window__debounce.500ms.leading="$foo = ''"`, func(t *testing.T) {
 		n := Button(data.On("click", "$foo = ''", data.ModifierWindow, data.ModifierDebounce, data.Duration(500*time.Millisecond), data.ModifierLeading))
 		assert.Equal(t, `<button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>`, n)
+	})
+
+	t.Run(`should output data-on:fullscreenchange__document="$fullscreen = !$fullscreen"`, func(t *testing.T) {
+		n := Button(data.On("fullscreenchange", "$fullscreen = !$fullscreen", data.ModifierDocument))
+		assert.Equal(t, `<button data-on:fullscreenchange__document="$fullscreen = !$fullscreen"></button>`, n)
 	})
 }
 
@@ -252,15 +322,15 @@ func TestRef(t *testing.T) {
 		modifier data.Modifier
 		expected string
 	}{
-		{name: `should output data-ref__case.camel="foo"`, modifier: data.ModifierCamel, expected: `<div data-ref__case.camel="foo"></div>`},
-		{name: `should output data-ref__case.kebab="foo"`, modifier: data.ModifierKebab, expected: `<div data-ref__case.kebab="foo"></div>`},
-		{name: `should output data-ref__case.snake="foo"`, modifier: data.ModifierSnake, expected: `<div data-ref__case.snake="foo"></div>`},
-		{name: `should output data-ref__case.pascal="foo"`, modifier: data.ModifierPascal, expected: `<div data-ref__case.pascal="foo"></div>`},
+		{name: `should output data-ref:my-signal__case.camel`, modifier: data.ModifierCamel, expected: `<div data-ref:my-signal__case.camel></div>`},
+		{name: `should output data-ref:my-signal__case.kebab`, modifier: data.ModifierKebab, expected: `<div data-ref:my-signal__case.kebab></div>`},
+		{name: `should output data-ref:my-signal__case.snake`, modifier: data.ModifierSnake, expected: `<div data-ref:my-signal__case.snake></div>`},
+		{name: `should output data-ref:my-signal__case.pascal`, modifier: data.ModifierPascal, expected: `<div data-ref:my-signal__case.pascal></div>`},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			n := Div(data.Ref("foo", data.ModifierCase, test.modifier))
+			n := Div(data.Ref("my-signal", data.ModifierCase, test.modifier))
 			assert.Equal(t, test.expected, n)
 		})
 	}
@@ -334,6 +404,26 @@ func ExampleBind() {
 	// Output: <input data-bind="foo">
 }
 
+func ExampleBind_withModifierCase() {
+	fmt.Print(Input(data.Bind("my-signal", data.ModifierCase, data.ModifierKebab)))
+	// Output: <input data-bind:my-signal__case.kebab>
+}
+
+func ExampleBind_withProp() {
+	fmt.Print(Input(data.Bind("is-checked", data.Prop("checked"))))
+	// Output: <input data-bind:is-checked__prop.checked>
+}
+
+func ExampleBind_withEvent() {
+	fmt.Print(Input(data.Bind("query", data.Event("input", "change"))))
+	// Output: <input data-bind:query__event.input.change>
+}
+
+func ExampleBind_withPropAndEvent() {
+	fmt.Print(El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change"))))
+	// Output: <my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>
+}
+
 func ExampleClass() {
 	fmt.Print(Div(data.Class("hidden", "$hidden")))
 	// Output: <div data-class="{hidden: $hidden}"></div>
@@ -380,8 +470,8 @@ func ExampleIndicator() {
 }
 
 func ExampleIndicator_withModifierCase() {
-	fmt.Print(Button(data.Indicator("fetching", data.ModifierCase, data.ModifierKebab)))
-	// Output: <button data-indicator__case.kebab="fetching"></button>
+	fmt.Print(Button(data.Indicator("my-signal", data.ModifierCase, data.ModifierKebab)))
+	// Output: <button data-indicator:my-signal__case.kebab></button>
 }
 
 func ExampleJSONSignals() {
@@ -399,6 +489,11 @@ func ExampleJSONSignals_withModifier() {
 	// Output: <pre data-json-signals__terse></pre>
 }
 
+func ExampleNonce() {
+	fmt.Print(HTML(data.Nonce("abc123")))
+	// Output: <html data-nonce="abc123"></html>
+}
+
 func ExampleOn_click() {
 	fmt.Print(Button(data.On("click", "$foo = ''")))
 	// Output: <button data-on:click="$foo = &#39;&#39;"></button>
@@ -407,6 +502,11 @@ func ExampleOn_click() {
 func ExampleOn_withModifiers() {
 	fmt.Print(Button(data.On("click", "$foo = ''", data.ModifierWindow, data.ModifierDebounce, data.Duration(500*time.Millisecond), data.ModifierLeading)))
 	// Output: <button data-on:click__window__debounce.500ms.leading="$foo = &#39;&#39;"></button>
+}
+
+func ExampleOn_withModifierDocument() {
+	fmt.Print(Button(data.On("fullscreenchange", "$fullscreen = !$fullscreen", data.ModifierDocument)))
+	// Output: <button data-on:fullscreenchange__document="$fullscreen = !$fullscreen"></button>
 }
 
 func ExampleOnIntersect() {
@@ -475,8 +575,8 @@ func ExampleRef() {
 }
 
 func ExampleRef_withModifierCase() {
-	fmt.Print(Div(data.Ref("foo", data.ModifierCase, data.ModifierKebab)))
-	// Output: <div data-ref__case.kebab="foo"></div>
+	fmt.Print(Div(data.Ref("my-signal", data.ModifierCase, data.ModifierKebab)))
+	// Output: <div data-ref:my-signal__case.kebab></div>
 }
 
 func ExampleShow() {
@@ -607,4 +707,38 @@ func ExampleOnIntersect_withExit() {
 func ExampleOnIntersect_withThreshold() {
 	fmt.Print(Div(data.OnIntersect("$visible = true", data.ModifierThreshold, data.Threshold(0.25))))
 	// Output: <div data-on-intersect__threshold.25="$visible = true"></div>
+}
+
+func TestProp(t *testing.T) {
+	t.Run("should format checked as __prop.checked", func(t *testing.T) {
+		assert.EqualString(t, "__prop.checked", string(data.Prop("checked")))
+	})
+
+	t.Run("should keep a kebab-case property name as given", func(t *testing.T) {
+		assert.EqualString(t, "__prop.inner-html", string(data.Prop("inner-html")))
+	})
+}
+
+func ExampleProp() {
+	fmt.Print(Input(data.Bind("is-checked", data.Prop("checked"))))
+	// Output: <input data-bind:is-checked__prop.checked>
+}
+
+func TestEvent(t *testing.T) {
+	t.Run("should format a single event as __event.change", func(t *testing.T) {
+		assert.EqualString(t, "__event.change", string(data.Event("change")))
+	})
+
+	t.Run("should format multiple events as __event.input.change", func(t *testing.T) {
+		assert.EqualString(t, "__event.input.change", string(data.Event("input", "change")))
+	})
+
+	t.Run("should output just __event with no event names", func(t *testing.T) {
+		assert.EqualString(t, "__event", string(data.Event()))
+	})
+}
+
+func ExampleEvent() {
+	fmt.Print(Input(data.Bind("query", data.Event("input", "change"))))
+	// Output: <input data-bind:query__event.input.change>
 }
