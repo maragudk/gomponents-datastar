@@ -22,6 +22,15 @@ func Equal(t *testing.T, expected string, actual Node) {
 	}
 }
 
+// EqualString checks for equality between the given expected and actual strings.
+func EqualString(t *testing.T, expected, actual string) {
+	t.Helper()
+
+	if expected != actual {
+		t.Fatalf(`expected "%v" but got "%v"`, expected, actual)
+	}
+}
+
 // Error checks for a non-nil error.
 func Error(t *testing.T, err error) {
 	t.Helper()
