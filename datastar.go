@@ -26,7 +26,6 @@ const (
 	ModifierDelay          Modifier = "__delay"
 	ModifierDocument       Modifier = "__document" // Attaches the event listener to the document element
 	ModifierDuration       Modifier = "__duration"
-	ModifierEvent          Modifier = "__event" // Takes event names from [Event]
 	ModifierExit           Modifier = "__exit"
 	ModifierFull           Modifier = "__full"
 	ModifierHalf           Modifier = "__half"
@@ -35,7 +34,6 @@ const (
 	ModifierOutside        Modifier = "__outside"
 	ModifierPassive        Modifier = "__passive"
 	ModifierPrevent        Modifier = "__prevent"
-	ModifierProp           Modifier = "__prop" // Takes a property name from [Prop]
 	ModifierSelf           Modifier = "__self"
 	ModifierStop           Modifier = "__stop"
 	ModifierTerse          Modifier = "__terse"
@@ -82,36 +80,36 @@ func Threshold(threshold float64) Modifier {
 	return Modifier(strings.TrimPrefix(fmt.Sprintf("%.2f", threshold), "0"))
 }
 
-// Prop outputs a property name for the [ModifierProp] modifier, for example ".checked".
-// [ModifierProp] binds to a specific property instead of the default binding. The property must not be read-only.
+// Prop outputs the __prop modifier for [Bind], for example "__prop.checked".
+// It binds to a specific property instead of the default binding. The property must not be read-only.
+//
+// Unlike [Duration] and [Threshold], which are reused across several modifiers and so take one as a separate argument,
+// __prop takes only a property name, so it is a single modifier.
 //
 // Datastar reads the property name from the attribute key, which HTML lowercases, and converts it from kebab case.
 // Give multi-word property names in kebab case, so "inner-html" rather than "innerHTML".
 //
-// Panics if the property name is empty, or contains anything other than lowercase letters, digits, dashes, and underscores.
-//
 // See https://data-star.dev/reference/attributes#data-bind
 func Prop(name string) Modifier {
-	return Modifier("." + keyArgument("property name", name))
+	return Modifier("__prop." + name)
 }
 
-// Event outputs one or more event names for the [ModifierEvent] modifier, for example ".input.change".
-// [ModifierEvent] defines which events sync the element property back to the signal.
+// Event outputs the __event modifier for [Bind], for example "__event.input.change".
+// It defines which events sync the element property back to the signal.
+//
+// Unlike [Duration] and [Threshold], which are reused across several modifiers and so take one as a separate argument,
+// __event takes only event names, so it is a single modifier.
 //
 // Datastar reads the event names from the attribute key, which HTML lowercases.
 // Give multi-word event names in kebab case, so "my-event" rather than "myEvent".
 //
-// Panics if no event names are given, or if any of them is empty
-// or contains anything other than lowercase letters, digits, dashes, and underscores.
+// Datastar adds no listeners if no event names are given.
 //
 // See https://data-star.dev/reference/attributes#data-bind
 func Event(names ...string) Modifier {
-	if len(names) == 0 {
-		panic("at least one event name must be given")
-	}
-	v := ""
+	v := "__event"
 	for _, name := range names {
-		v += "." + keyArgument("event name", name)
+		v += "." + name
 	}
 	return Modifier(v)
 }
@@ -170,22 +168,26 @@ func Attr(pairs ...string) g.Node {
 // <input type="file" data-bind:files multiple />
 //
 // Modifiers allow you to modify behavior when binding signals using a key, so passing any modifier emits the key form of the attribute.
-// Datastar then reads the signal name from the key and converts it to camel case, so give the name in kebab case: "my-signal" becomes $mySignal.
-// Panics if a name that cannot be read back from a key is combined with modifiers.
+// Datastar then reads the signal name from the key, which HTML lowercases, and converts it to camel case,
+// so give the name in kebab case: "my-signal" becomes $mySignal.
 //
 // Native form controls use their built-in binding semantics automatically. Generic custom elements default to value and change.
-// Use [ModifierProp] and [ModifierEvent] when a custom element’s live state is stored somewhere else.
+// Use [Prop] and [Event] when a custom element’s live state is stored somewhere else.
 //
 // <my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>
 //
-// [ModifierProp] and [ModifierEvent] are available since Datastar v1.0.0, and can be used independently of each other since v1.0.1.
+// [Prop] and [Event] are available since Datastar v1.0.0, and can be used independently of each other since v1.0.1.
 //
 // See https://data-star.dev/reference/attributes#data-bind
 func Bind(name string, modifiers ...Modifier) g.Node {
 	if len(modifiers) == 0 {
 		return data("bind", name)
 	}
-	return data("bind:" + key(name, modifiers))
+	nameWithModifiers := name
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("bind:" + nameWithModifiers)
 }
 
 // Class adds or removes a class to or from an element based on an expression.
@@ -289,15 +291,19 @@ func IgnoreMorph() g.Node {
 //
 // Modifiers allow you to modify behavior when defining indicator signals using a key,
 // so passing any modifier emits the key form of the attribute.
-// Datastar then reads the signal name from the key and converts it to camel case, so give the name in kebab case: "my-signal" becomes $mySignal.
-// Panics if a name that cannot be read back from a key is combined with modifiers.
+// Datastar then reads the signal name from the key, which HTML lowercases, and converts it to camel case,
+// so give the name in kebab case: "my-signal" becomes $mySignal.
 //
 // See https://data-star.dev/reference/attributes#data-indicator
 func Indicator(name string, modifiers ...Modifier) g.Node {
 	if len(modifiers) == 0 {
 		return data("indicator", name)
 	}
-	return data("indicator:" + key(name, modifiers))
+	nameWithModifiers := name
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("indicator:" + nameWithModifiers)
 }
 
 // JSONSignals sets the text content of an element to a reactive JSON stringified version of signals.
@@ -489,8 +495,8 @@ func PreserveAttr(attrs ...string) g.Node {
 //
 // Modifiers allow you to modify behavior when defining references using a key,
 // so passing any modifier emits the key form of the attribute.
-// Datastar then reads the signal name from the key and converts it to camel case, so give the name in kebab case: "my-signal" becomes $mySignal.
-// Panics if a name that cannot be read back from a key is combined with modifiers.
+// Datastar then reads the signal name from the key, which HTML lowercases, and converts it to camel case,
+// so give the name in kebab case: "my-signal" becomes $mySignal.
 //
 // <div data-ref:my-signal__case.kebab></div>
 //
@@ -499,7 +505,11 @@ func Ref(name string, modifiers ...Modifier) g.Node {
 	if len(modifiers) == 0 {
 		return data("ref", name)
 	}
-	return data("ref:" + key(name, modifiers))
+	nameWithModifiers := name
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("ref:" + nameWithModifiers)
 }
 
 // Show or hide an element based on whether an expression evaluates to true or false.
@@ -627,53 +637,6 @@ func toSignals(signals map[string]any) string {
 		panic(fmt.Sprintf("failed to marshal signals: %v", err))
 	}
 	return string(b)
-}
-
-// keyArgument returns v, which is a dot-separated argument to a modifier in the key form of an attribute name.
-// A dot would start another argument, and the argument is neither escaped by gomponents nor lowercased before
-// Datastar reads it back, so reject anything but what survives that round trip.
-// Panics if v is empty or contains anything other than lowercase letters, digits, dashes, and underscores.
-func keyArgument(what, v string) string {
-	if v == "" {
-		panic(what + " must not be empty")
-	}
-	for _, r := range v {
-		switch {
-		case r >= 'a' && r <= 'z', r >= '0' && r <= '9', r == '-', r == '_':
-		case r >= 'A' && r <= 'Z':
-			panic(fmt.Sprintf("%v must not contain uppercase letters, because HTML lowercases attribute names, so use a dash instead, but is: %v", what, v))
-		default:
-			panic(fmt.Sprintf("%v must only contain lowercase letters, digits, dashes, and underscores, but is: %v", what, v))
-		}
-	}
-	return v
-}
-
-// key returns name with modifiers appended, for use as the key form of an attribute name.
-// The key form puts the name into the attribute name, where it is neither escaped by gomponents
-// nor recoverable by Datastar unless it is a valid key, so reject anything that isn't.
-// Panics if the name is empty, contains a double underscore, or contains anything
-// other than lowercase letters, digits, dashes, dots, and underscores.
-func key(name string, modifiers []Modifier) string {
-	if name == "" {
-		panic("name must not be empty")
-	}
-	if strings.Contains(name, "__") {
-		panic(fmt.Sprintf("name must not contain a double underscore, because it delimits modifiers, but is: %v", name))
-	}
-	for _, r := range name {
-		switch {
-		case r >= 'a' && r <= 'z', r >= '0' && r <= '9', r == '-', r == '.', r == '_':
-		case r >= 'A' && r <= 'Z':
-			panic(fmt.Sprintf("name must not contain uppercase letters, because HTML lowercases attribute names, so use a dash instead, but is: %v", name))
-		default:
-			panic(fmt.Sprintf("name must only contain lowercase letters, digits, dashes, dots, and underscores, but is: %v", name))
-		}
-	}
-	for _, modifier := range modifiers {
-		name += string(modifier)
-	}
-	return name
 }
 
 func data(name string, value ...string) g.Node {

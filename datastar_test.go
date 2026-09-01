@@ -31,17 +31,22 @@ func TestBind(t *testing.T) {
 	})
 
 	t.Run(`should output data-bind:is-checked__prop.checked`, func(t *testing.T) {
-		n := Input(data.Bind("is-checked", data.ModifierProp, data.Prop("checked")))
+		n := Input(data.Bind("is-checked", data.Prop("checked")))
 		assert.Equal(t, `<input data-bind:is-checked__prop.checked>`, n)
 	})
 
 	t.Run(`should output data-bind:query__event.input.change`, func(t *testing.T) {
-		n := Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change")))
+		n := Input(data.Bind("query", data.Event("input", "change")))
 		assert.Equal(t, `<input data-bind:query__event.input.change>`, n)
 	})
 
+	t.Run(`should output data-bind:foo__prop.checked__event.change when combining Prop and Event`, func(t *testing.T) {
+		n := Input(data.Bind("foo", data.Prop("checked"), data.Event("change")))
+		assert.Equal(t, `<input data-bind:foo__prop.checked__event.change>`, n)
+	})
+
 	t.Run(`should output data-bind:is-checked__prop.checked__event.change`, func(t *testing.T) {
-		n := g.El("my-toggle", data.Bind("is-checked", data.ModifierProp, data.Prop("checked"), data.ModifierEvent, data.Event("change")))
+		n := g.El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change")))
 		assert.Equal(t, `<my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>`, n)
 	})
 
@@ -63,42 +68,10 @@ func TestBind(t *testing.T) {
 		})
 	}
 
-	t.Run("should not panic on an invalid name without modifiers", func(t *testing.T) {
+	t.Run("should escape the name in the value form", func(t *testing.T) {
 		n := Input(data.Bind(`foo" onclick="alert(1)`))
 		assert.Equal(t, `<input data-bind="foo&#34; onclick=&#34;alert(1)">`, n)
 	})
-
-	for _, name := range invalidNames {
-		t.Run("should panic on the name "+name+" with modifiers", func(t *testing.T) {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Errorf("expected panic for name %v", name)
-				}
-			}()
-			Input(data.Bind(name, data.ModifierProp, data.Prop("checked")))
-		})
-	}
-}
-
-// invalidNames are signal names that Datastar cannot read back from an attribute key,
-// either because they break out of the attribute name or because they don't survive the key parser.
-var invalidNames = []string{
-	"",
-	`foo" onclick="alert(1)`,
-	"foo bar",
-	"foo__bar",
-	"foo:bar",
-	"fooBar",
-}
-
-// invalidKeyArguments are modifier arguments that Datastar cannot read back from an attribute key,
-// either because they break out of the attribute name or because a dot starts another argument.
-var invalidKeyArguments = []string{
-	"",
-	`foo" onclick="alert(1)`,
-	"foo bar",
-	"foo.bar",
-	"fooBar",
 }
 
 func TestClass(t *testing.T) {
@@ -207,16 +180,6 @@ func TestIndicator(t *testing.T) {
 		})
 	}
 
-	for _, name := range invalidNames {
-		t.Run("should panic on the name "+name+" with modifiers", func(t *testing.T) {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Errorf("expected panic for name %v", name)
-				}
-			}()
-			Button(data.Indicator(name, data.ModifierCase, data.ModifierKebab))
-		})
-	}
 }
 
 func TestNonce(t *testing.T) {
@@ -373,16 +336,6 @@ func TestRef(t *testing.T) {
 		})
 	}
 
-	for _, name := range invalidNames {
-		t.Run("should panic on the name "+name+" with modifiers", func(t *testing.T) {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Errorf("expected panic for name %v", name)
-				}
-			}()
-			Div(data.Ref(name, data.ModifierCase, data.ModifierKebab))
-		})
-	}
 }
 
 func TestShow(t *testing.T) {
@@ -458,18 +411,18 @@ func ExampleBind_withModifierCase() {
 	// Output: <input data-bind:my-signal__case.kebab>
 }
 
-func ExampleBind_withModifierProp() {
-	fmt.Print(Input(data.Bind("is-checked", data.ModifierProp, data.Prop("checked"))))
+func ExampleBind_withProp() {
+	fmt.Print(Input(data.Bind("is-checked", data.Prop("checked"))))
 	// Output: <input data-bind:is-checked__prop.checked>
 }
 
-func ExampleBind_withModifierEvent() {
-	fmt.Print(Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change"))))
+func ExampleBind_withEvent() {
+	fmt.Print(Input(data.Bind("query", data.Event("input", "change"))))
 	// Output: <input data-bind:query__event.input.change>
 }
 
-func ExampleBind_withModifierPropAndEvent() {
-	fmt.Print(g.El("my-toggle", data.Bind("is-checked", data.ModifierProp, data.Prop("checked"), data.ModifierEvent, data.Event("change"))))
+func ExampleBind_withPropAndEvent() {
+	fmt.Print(g.El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change"))))
 	// Output: <my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>
 }
 
@@ -759,62 +712,35 @@ func ExampleOnIntersect_withThreshold() {
 }
 
 func TestProp(t *testing.T) {
-	for _, name := range invalidKeyArguments {
-		t.Run("should panic on the property name "+name, func(t *testing.T) {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Errorf("expected panic for property name %v", name)
-				}
-			}()
-			data.Prop(name)
-		})
-	}
-
-	t.Run("should format checked as .checked", func(t *testing.T) {
-		assert.EqualString(t, ".checked", string(data.Prop("checked")))
+	t.Run("should format checked as __prop.checked", func(t *testing.T) {
+		assert.EqualString(t, "__prop.checked", string(data.Prop("checked")))
 	})
 
 	t.Run("should keep a kebab-case property name as given", func(t *testing.T) {
-		assert.EqualString(t, ".inner-html", string(data.Prop("inner-html")))
+		assert.EqualString(t, "__prop.inner-html", string(data.Prop("inner-html")))
 	})
 }
 
 func ExampleProp() {
-	fmt.Print(Input(data.Bind("is-checked", data.ModifierProp, data.Prop("checked"))))
+	fmt.Print(Input(data.Bind("is-checked", data.Prop("checked"))))
 	// Output: <input data-bind:is-checked__prop.checked>
 }
 
 func TestEvent(t *testing.T) {
-	t.Run("should panic on no event names", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("expected panic for no event names")
-			}
-		}()
-		data.Event()
+	t.Run("should format a single event as __event.change", func(t *testing.T) {
+		assert.EqualString(t, "__event.change", string(data.Event("change")))
 	})
 
-	for _, name := range invalidKeyArguments {
-		t.Run("should panic on the event name "+name, func(t *testing.T) {
-			defer func() {
-				if r := recover(); r == nil {
-					t.Errorf("expected panic for event name %v", name)
-				}
-			}()
-			data.Event("input", name)
-		})
-	}
-
-	t.Run("should format a single event as .change", func(t *testing.T) {
-		assert.EqualString(t, ".change", string(data.Event("change")))
+	t.Run("should format multiple events as __event.input.change", func(t *testing.T) {
+		assert.EqualString(t, "__event.input.change", string(data.Event("input", "change")))
 	})
 
-	t.Run("should format multiple events as .input.change", func(t *testing.T) {
-		assert.EqualString(t, ".input.change", string(data.Event("input", "change")))
+	t.Run("should output just __event with no event names", func(t *testing.T) {
+		assert.EqualString(t, "__event", string(data.Event()))
 	})
 }
 
 func ExampleEvent() {
-	fmt.Print(Input(data.Bind("query", data.ModifierEvent, data.Event("input", "change"))))
+	fmt.Print(Input(data.Bind("query", data.Event("input", "change"))))
 	// Output: <input data-bind:query__event.input.change>
 }
