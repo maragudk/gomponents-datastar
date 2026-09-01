@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	g "maragu.dev/gomponents"
+	. "maragu.dev/gomponents"
 	. "maragu.dev/gomponents/html"
 
 	data "maragu.dev/gomponents-datastar"
@@ -46,7 +46,7 @@ func TestBind(t *testing.T) {
 	})
 
 	t.Run(`should output data-bind:is-checked__prop.checked__event.change`, func(t *testing.T) {
-		n := g.El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change")))
+		n := El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change")))
 		assert.Equal(t, `<my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>`, n)
 	})
 
@@ -179,7 +179,6 @@ func TestIndicator(t *testing.T) {
 			assert.Equal(t, test.expected, n)
 		})
 	}
-
 }
 
 func TestNonce(t *testing.T) {
@@ -335,7 +334,6 @@ func TestRef(t *testing.T) {
 			assert.Equal(t, test.expected, n)
 		})
 	}
-
 }
 
 func TestShow(t *testing.T) {
@@ -422,7 +420,7 @@ func ExampleBind_withEvent() {
 }
 
 func ExampleBind_withPropAndEvent() {
-	fmt.Print(g.El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change"))))
+	fmt.Print(El("my-toggle", data.Bind("is-checked", data.Prop("checked"), data.Event("change"))))
 	// Output: <my-toggle data-bind:is-checked__prop.checked__event.change></my-toggle>
 }
 
