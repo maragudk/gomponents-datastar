@@ -259,6 +259,28 @@ func buildPage() Node {
 				),
 			),
 
+			// Single Signal Demo
+			Div(Class("demo-section"),
+				H2(Text("Single Signals")),
+				P(Text("The key form of data-signals patches a single signal, and reads the signal name from the attribute key. Unlike the value form, it applies the casing modifiers to that name.")),
+				Div(Class("grid"),
+					Div(Class("demo-box"),
+						data.Signal("my-count", 1),
+						H3(Text("Default Camel Case")),
+						P(Text(`data-signals:my-count="1" creates $myCount.`)),
+						P(Text("Value: "), Span(data.Text("$myCount"))),
+						Button(data.On("click", "$myCount++"), Text("Increment")),
+					),
+					Div(Class("demo-box"),
+						data.Signal("my-total", 2, data.ModifierCase, data.ModifierSnake),
+						H3(Text("Snake Case")),
+						P(Text(`data-signals:my-total__case.snake="2" creates $my_total.`)),
+						P(Text("Value: "), Span(data.Text("$my_total"))),
+						Button(data.On("click", "$my_total++"), Text("Increment")),
+					),
+				),
+			),
+
 			// Text Binding Demo
 			Div(Class("demo-section"),
 				H2(Text("Text Binding")),

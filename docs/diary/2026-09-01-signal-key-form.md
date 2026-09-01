@@ -117,3 +117,57 @@ The claim that a string containing `@name(` does not survive is mine, verified a
 ### Future work
 
 `Signals` still has no test for two modifiers concatenating, because deleting the `__case.kebab` test removed the only one and `__ifmissing` is the sole modifier that works there. The demo does not exercise `Signal`, unlike `Prop`/`Event` which got one in `ea7e64a`. Both are noted for the lead rather than acted on.
+
+## Step 3: Demo `Signal` and verify it in a browser
+
+**Author:** builder-datastar-103
+
+### Prompt Context
+
+**Verbatim prompt:** "1. Add a `Signal` example to the demo in demo/main.go (new API gets demo coverage, per Markus's standard from #46). Show the key form working end-to-end, ideally visibly distinguishable from value-form behavior. Regenerate docs/index.html. Browser-test with playwright-cli: new example works, spot-check existing ones, console free of Datastar errors. 2. No new Signals concatenation test — decided, nothing to do there."
+
+**Interpretation:** Give `Signal` the same live demo coverage `Prop`/`Event` got, choosing an example where the key form's behaviour is observably different from what the value form would do, and confirm it against the real bundle in a browser.
+
+**Inferred intent:** Before tagging v0.4.0, prove in a browser that the function added to fix a silently-ignored modifier does not itself silently do nothing.
+
+### What I did
+
+Added a "Single Signals" section to `/demo/main.go`, placed right after the existing "Signals" section so the two forms sit together. Two boxes differing only by a modifier: `data.Signal("my-count", 1)` labelled as creating `$myCount`, and `data.Signal("my-total", 2, data.ModifierCase, data.ModifierSnake)` labelled as creating `$my_total`. Each displays its signal with `data.Text` and has an Increment button. Regenerated `/docs/index.html`, then served `/docs` and drove it with playwright-cli.
+
+Item 2 needed no work.
+
+### Why
+
+The point of `Signal` is that casing modifiers apply here and not on `Signals`, so the demo had to make that difference visible rather than just show a signal existing. Two boxes that differ only in the modifier do that: `my-count` and `my-total` are the same shape, so the only reason their signal names diverge is the modifier.
+
+### What worked
+
+Everything, and the "All Signals (JSON)" dump gave the cleanest possible evidence:
+
+```
+{ ..., "myCount": 3, "my_total": 3, "total": 200, "myDiv": {} }
+```
+
+`my-count` became `myCount` by the default camel conversion and `my-total` became `my_total` because `__case.snake` was applied. Had the modifier been ignored the way it is in the value form, that key would read `myTotal`. Both boxes rendered their initial values (1 and 2) on load and incremented live to 3, so the signals are real and reactive, not just present.
+
+Existing demos were unaffected: the counter incremented, text binding rendered "Hello, Markus!", the select reported `option2`, the `__prop.checked` checkbox and the show toggle both worked. Across the session the console held one error, a `404` for `/favicon.ico` from my own static server, and no Datastar errors.
+
+### What didn't work
+
+Nothing. Port 8080 was still occupied by an unrelated `app` process as in Step 4 of the previous diary, so I served `/docs` on 8099 again rather than using the demo's server mode — which tests the published artifact anyway. Two `playwright-cli` friction points recurred and were already known: `eval` is refused in a worktree-isolated session, and `snapshot --filename=` writes relative to the working directory, so I deleted the stray files and `.playwright-cli/` afterwards.
+
+### What I learned
+
+A demo of a modifier is only worth anything if the modifier's absence would change what you see. Showing `data.Signal("foo", 1)` alone would have proved the key form parses but said nothing about the bug this change exists to fix, because a signal named `foo` looks identical either way. Pairing two calls whose names differ only through the modifier is what makes the JSON dump a proof rather than a screenshot.
+
+### What was tricky
+
+Nothing this step. The choice of `snake` over `kebab` for the second box mattered, though: `__case.kebab` is an identity conversion in Datastar, so a kebab example would have rendered a name indistinguishable from the raw key and demonstrated nothing — the same trap that produced the contradicting doc comment in Step 2.
+
+### What warrants review
+
+Whether "Single Signals" is the right heading next to the existing "Signals" section, and whether two boxes is the right size for this. The two new signals appear in the page-wide "All Signals (JSON)" box, which is intended but makes that box longer.
+
+### Future work
+
+`Signals` still has no multi-modifier concatenation test, by decision. Tag v0.4.0 after this merges.
