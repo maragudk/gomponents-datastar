@@ -2,6 +2,7 @@ package datastar_test
 
 import (
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -343,6 +344,105 @@ func TestShow(t *testing.T) {
 	})
 }
 
+func TestSignal(t *testing.T) {
+	t.Run(`should output data-signals:foo="1"`, func(t *testing.T) {
+		n := Div(data.Signal("foo", 1))
+		assert.Equal(t, `<div data-signals:foo="1"></div>`, n)
+	})
+
+	t.Run(`should output a nested signal name using dot-notation`, func(t *testing.T) {
+		n := Div(data.Signal("foo.bar", 1))
+		assert.Equal(t, `<div data-signals:foo.bar="1"></div>`, n)
+	})
+
+	t.Run(`should output data-signals:foo__ifmissing="1"`, func(t *testing.T) {
+		n := Div(data.Signal("foo", 1, data.ModifierIfMissing))
+		assert.Equal(t, `<div data-signals:foo__ifmissing="1"></div>`, n)
+	})
+
+	t.Run(`should output data-signals:my-signal__case.kebab__ifmissing="1"`, func(t *testing.T) {
+		n := Div(data.Signal("my-signal", 1, data.ModifierCase, data.ModifierKebab, data.ModifierIfMissing))
+		assert.Equal(t, `<div data-signals:my-signal__case.kebab__ifmissing="1"></div>`, n)
+	})
+
+	t.Run(`should output a JSON string value`, func(t *testing.T) {
+		n := Div(data.Signal("foo", "bar"))
+		assert.Equal(t, `<div data-signals:foo="&#34;bar&#34;"></div>`, n)
+	})
+
+	t.Run(`should escape a string value containing a quote`, func(t *testing.T) {
+		n := Div(data.Signal("foo", `ba"r`))
+		assert.Equal(t, `<div data-signals:foo="&#34;ba\&#34;r&#34;"></div>`, n)
+	})
+
+	t.Run(`should keep a dollar sign in a string value, so it stays text rather than a signal reference`, func(t *testing.T) {
+		n := Div(data.Signal("foo", "$bar"))
+		assert.Equal(t, `<div data-signals:foo="&#34;$bar&#34;"></div>`, n)
+	})
+
+	t.Run(`should escape a string value containing a backslash`, func(t *testing.T) {
+		n := Div(data.Signal("foo", `back\slash`))
+		assert.Equal(t, `<div data-signals:foo="&#34;back\\slash&#34;"></div>`, n)
+	})
+
+	t.Run(`should escape a string value containing a newline`, func(t *testing.T) {
+		n := Div(data.Signal("foo", "line1\nline2"))
+		assert.Equal(t, `<div data-signals:foo="&#34;line1\nline2&#34;"></div>`, n)
+	})
+
+	t.Run(`should output a float value`, func(t *testing.T) {
+		n := Div(data.Signal("foo", 1.5))
+		assert.Equal(t, `<div data-signals:foo="1.5"></div>`, n)
+	})
+
+	t.Run("should panic on a value that cannot be JSON encoded", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expected panic for a value that cannot be JSON encoded")
+			}
+		}()
+		data.Signal("foo", math.NaN())
+	})
+
+	t.Run(`should output null for a nil value, which removes the signal`, func(t *testing.T) {
+		n := Div(data.Signal("foo", nil))
+		assert.Equal(t, `<div data-signals:foo="null"></div>`, n)
+	})
+
+	t.Run(`should output a boolean value`, func(t *testing.T) {
+		n := Div(data.Signal("foo", true))
+		assert.Equal(t, `<div data-signals:foo="true"></div>`, n)
+	})
+
+	t.Run(`should output a nested object value`, func(t *testing.T) {
+		n := Div(data.Signal("foo", map[string]any{"bar": 1, "baz": 2}))
+		assert.Equal(t, `<div data-signals:foo="{&#34;bar&#34;:1,&#34;baz&#34;:2}"></div>`, n)
+	})
+
+	t.Run(`should output an array value`, func(t *testing.T) {
+		n := Div(data.Signal("foo", []string{"bar", "baz"}))
+		assert.Equal(t, `<div data-signals:foo="[&#34;bar&#34;,&#34;baz&#34;]"></div>`, n)
+	})
+
+	tests := []struct {
+		name     string
+		modifier data.Modifier
+		expected string
+	}{
+		{name: `should output data-signals:my-signal__case.camel="1"`, modifier: data.ModifierCamel, expected: `<div data-signals:my-signal__case.camel="1"></div>`},
+		{name: `should output data-signals:my-signal__case.kebab="1"`, modifier: data.ModifierKebab, expected: `<div data-signals:my-signal__case.kebab="1"></div>`},
+		{name: `should output data-signals:my-signal__case.snake="1"`, modifier: data.ModifierSnake, expected: `<div data-signals:my-signal__case.snake="1"></div>`},
+		{name: `should output data-signals:my-signal__case.pascal="1"`, modifier: data.ModifierPascal, expected: `<div data-signals:my-signal__case.pascal="1"></div>`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			n := Div(data.Signal("my-signal", 1, data.ModifierCase, test.modifier))
+			assert.Equal(t, test.expected, n)
+		})
+	}
+}
+
 func TestSignals(t *testing.T) {
 	t.Run(`should output data-signals="{"foo":1}"`, func(t *testing.T) {
 		n := Div(data.Signals(map[string]any{"foo": 1}))
@@ -362,11 +462,6 @@ func TestSignals(t *testing.T) {
 	t.Run(`should output data-signals__ifmissing="{"foo":1}"`, func(t *testing.T) {
 		n := Div(data.Signals(map[string]any{"foo": 1}, data.ModifierIfMissing))
 		assert.Equal(t, `<div data-signals__ifmissing="{&#34;foo&#34;:1}"></div>`, n)
-	})
-
-	t.Run(`should output data-signals__case.kebab="{"foo":1}"`, func(t *testing.T) {
-		n := Div(data.Signals(map[string]any{"foo": 1}, data.ModifierCase, data.ModifierKebab))
-		assert.Equal(t, `<div data-signals__case.kebab="{&#34;foo&#34;:1}"></div>`, n)
 	})
 }
 
@@ -582,6 +677,21 @@ func ExampleRef_withModifierCase() {
 func ExampleShow() {
 	fmt.Print(Div(data.Show("$foo")))
 	// Output: <div data-show="$foo"></div>
+}
+
+func ExampleSignal() {
+	fmt.Print(Div(data.Signal("foo", 1)))
+	// Output: <div data-signals:foo="1"></div>
+}
+
+func ExampleSignal_withModifierCase() {
+	fmt.Print(Div(data.Signal("my-signal", 1, data.ModifierCase, data.ModifierKebab)))
+	// Output: <div data-signals:my-signal__case.kebab="1"></div>
+}
+
+func ExampleSignal_withModifierIfMissing() {
+	fmt.Print(Div(data.Signal("foo", "bar", data.ModifierIfMissing)))
+	// Output: <div data-signals:foo__ifmissing="&#34;bar&#34;"></div>
 }
 
 func ExampleSignals() {
