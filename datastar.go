@@ -526,6 +526,49 @@ func Show(expression string) g.Node {
 	return data("show", expression)
 }
 
+// Signal patches (adds, updates or removes) a single signal into the existing signals, using the key form of the attribute.
+// Values defined later in the DOM tree override those defined earlier.
+//
+// <div data-signals:foo="1"></div>
+//
+// Signals can be nested using dot-notation.
+//
+// <div data-signals:foo.bar="1"></div>
+//
+// Setting a signal's value to null or undefined removes the signal, so a nil value removes it,
+// unless [ModifierIfMissing] is given, which suppresses the removal.
+//
+// <div data-signals:foo="null"></div>
+//
+// The value is JSON encoded.
+//
+// Keys used in data-signals:* are converted to camel case, so the signal name mySignal must be written as data-signals:my-signal.
+// HTML lowercases attribute names, so give the name in kebab case.
+//
+// Signals beginning with an underscore are not included in requests to the backend by default.
+// You can opt to include them by modifying the value of the filterSignals option.
+//
+// Signal names cannot begin with nor contain a double underscore (__), due to its use as a modifier delimiter.
+//
+// Modifiers allow you to modify behavior when patching signals using a key, so both [ModifierCase] and [ModifierIfMissing] apply here.
+// [ModifierCase] replaces the camel case conversion rather than adding to it, and Datastar has no kebab conversion,
+// so [ModifierKebab] leaves the name exactly as written.
+//
+//	<div data-signals:my-signal__case.kebab="1"
+//	     data-signals:foo__ifmissing="1"
+//	></div>
+//
+// Panics if the value cannot be JSON encoded, such as a NaN or infinite float, a channel, or a function.
+//
+// See https://data-star.dev/reference/attributes#data-signals
+func Signal(name string, value any, modifiers ...Modifier) g.Node {
+	nameWithModifiers := name
+	for _, modifier := range modifiers {
+		nameWithModifiers += string(modifier)
+	}
+	return data("signals:"+nameWithModifiers, toJSON(value))
+}
+
 // Signals patches (adds, updates or removes) one or more signals into the existing signals. Values defined later in the DOM tree override those defined earlier.
 //
 // <div data-signals="{foo: {bar: 1, baz: 2}}"></div>
@@ -539,13 +582,19 @@ func Show(expression string) g.Node {
 //
 // Signal names cannot begin with nor contain a double underscore (__), due to its use as a modifier delimiter.
 //
+// Datastar converts the casing of a signal name it reads from the attribute key, and this form puts no name there,
+// so [ModifierCase] and the casing modifiers are still emitted but never applied. Use [Signal] to apply them to a single signal.
+// [ModifierIfMissing] applies to both forms.
+//
+// Panics if the signals cannot be JSON encoded, such as a NaN or infinite float, a channel, or a function.
+//
 // See https://data-star.dev/reference/attributes#data-signals
 func Signals(signals map[string]any, modifiers ...Modifier) g.Node {
 	nameWithModifiers := ""
 	for _, modifier := range modifiers {
 		nameWithModifiers += string(modifier)
 	}
-	return data("signals"+nameWithModifiers, toSignals(signals))
+	return data("signals"+nameWithModifiers, toJSON(signals))
 }
 
 // Style sets the value of inline CSS styles on an element based on an expression, and keeps them in sync.
@@ -631,10 +680,10 @@ func toFilter(filter Filter) string {
 	return v
 }
 
-func toSignals(signals map[string]any) string {
-	b, err := json.Marshal(signals)
+func toJSON(v any) string {
+	b, err := json.Marshal(v)
 	if err != nil {
-		panic(fmt.Sprintf("failed to marshal signals: %v", err))
+		panic(fmt.Sprintf("failed to marshal value: %v", err))
 	}
 	return string(b)
 }
