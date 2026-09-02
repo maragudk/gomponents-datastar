@@ -171,3 +171,51 @@ Whether "Single Signals" is the right heading next to the existing "Signals" sec
 ### Future work
 
 `Signals` still has no multi-modifier concatenation test, by decision. Tag v0.4.0 after this merges.
+
+## Step 4: Trim Datastar compiler internals out of the `Signal` doc comment
+
+**Author:** builder-datastar-103
+
+### Prompt Context
+
+**Verbatim prompt:** "One change from the codex second opinion on PR #47 (I verified it and agree): in the Signal doc comment in datastar.go (~line 543-546), the paragraph starting \"The value is JSON encoded. Datastar does not parse it as JSON: it evaluates the attribute value as a Datastar expression...\" through \"...does not survive.\" explains Datastar compiler internals (expression evaluation, action-rewrite order) — reverse-engineered, not from the docs, and fragile across Datastar updates. AGENTS.md requires docs verbatim from Datastar. Reduce it to just \"The value is JSON encoded.\" Keep the ModifierCase/kebab and nil+ModifierIfMissing notes — those describe observable behavior, not pipeline. Move the @name( finding to the diary if it isn't there already (it is useful knowledge, just not godoc)."
+
+**Interpretation:** Cut the paragraph describing how Datastar compiles the attribute value down to the single fact a caller needs, and keep the notes that describe what the caller can observe.
+
+**Inferred intent:** Keep godoc to the documented contract, so the comment does not go stale the next time Datastar changes its compiler.
+
+### What I did
+
+Replaced four lines of `/datastar.go` with one, so the paragraph now reads only "The value is JSON encoded." Left the two notes flagged as keepers untouched: that a nil value removes the signal unless `ModifierIfMissing` suppresses it, and that `ModifierCase` replaces the camel default so `ModifierKebab` leaves the name as written. Left `Signals`' comment alone; its casing paragraph says which modifiers apply where, which is observable behaviour rather than pipeline.
+
+The `@name(` finding was already recorded in Step 2 above, under "What I learned", with the rewrite regex verbatim, so nothing needed moving.
+
+### Why
+
+The house rule in `/AGENTS.md` is that attribute documentation comes verbatim from the Datastar docs with a link back. The removed sentences came from reading the minified bundle instead, and they described a two-stage textual rewrite that upstream is free to change in any release — a comment that is both unsourced and load-bearing on internals is one that quietly becomes wrong.
+
+### What worked
+
+The cut was clean: the removed text was one self-contained paragraph, and `make test` and `make lint` stayed green because nothing asserted on doc text.
+
+### What didn't work
+
+Nothing failed.
+
+### What I learned
+
+Verified knowledge and documentable knowledge are not the same set. Reading the bundle was the right way to establish that JSON is safe to emit here — that is what justified the design — but the justification belongs in the diary, and only the resulting contract belongs in godoc. I had conflated "I proved this" with "callers should read this."
+
+Also worth noting against Step 2's write-up: that step observed the `@name(` caveat was "stated on `Signal` but not on `Signals`", and treated the asymmetry as the open question. The resolution went the other way — it is now stated on neither, which is the consistent outcome.
+
+### What was tricky
+
+Nothing mechanically. The only judgement was scope: the same reasoning could be pointed at `Signals`' casing paragraph, but that one describes which modifiers take effect rather than how the compiler works, and the instruction explicitly protected notes of that kind.
+
+### What warrants review
+
+Whether "The value is JSON encoded." is enough for a caller who wonders what happens to a Go string containing Datastar action syntax. That behaviour is now documented nowhere in godoc — deliberately, but it is a real edge that affects `Signals` equally.
+
+### Future work
+
+Unchanged: `Signals` still has no multi-modifier concatenation test, by decision. Tag v0.4.0 after this merges.

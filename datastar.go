@@ -540,10 +540,7 @@ func Show(expression string) g.Node {
 //
 // <div data-signals:foo="null"></div>
 //
-// The value is JSON encoded. Datastar does not parse it as JSON: it evaluates the attribute value as a Datastar expression,
-// which JSON survives because it is a subset of the JavaScript object notation that syntax is built on.
-// Datastar rewrites its own action syntax first, though, without regard for string literals,
-// so a string value containing an @ followed by a name and an opening parenthesis does not survive.
+// The value is JSON encoded.
 //
 // Keys used in data-signals:* are converted to camel case, so the signal name mySignal must be written as data-signals:my-signal.
 // HTML lowercases attribute names, so give the name in kebab case.
